@@ -1,0 +1,151 @@
+import { ExternalLink, Percent, Star, Clock } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useFlightDeals } from "@/hooks/use-flight-search";
+
+export default function Deals() {
+  const { data: deals, isLoading } = useFlightDeals();
+
+  const formatPrice = (price: number) => {
+    return `€${(price / 100).toFixed(0)}`;
+  };
+
+  const getDealBadge = (dealType: string) => {
+    switch (dealType) {
+      case "percentage":
+        return <Badge variant="destructive" className="bg-red-500"><Percent className="h-3 w-3 mr-1" />30% OFF</Badge>;
+      case "best-deal":
+        return <Badge variant="destructive" className="bg-amber-500"><Star className="h-3 w-3 mr-1" />BEST DEAL</Badge>;
+      case "limited":
+        return <Badge variant="destructive" className="bg-red-500"><Clock className="h-3 w-3 mr-1" />LIMITED</Badge>;
+      default:
+        return <Badge variant="secondary">DEAL</Badge>;
+    }
+  };
+
+  const getDealGradient = (dealType: string) => {
+    switch (dealType) {
+      case "percentage":
+        return "bg-gradient-to-br from-blue-600 to-blue-800";
+      case "best-deal":
+        return "bg-gradient-to-br from-amber-500 to-orange-500";
+      case "limited":
+        return "bg-gradient-to-br from-emerald-500 to-emerald-600";
+      default:
+        return "bg-gradient-to-br from-blue-600 to-blue-800";
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-10">
+            <Skeleton className="h-10 w-96 mx-auto mb-4" />
+            <Skeleton className="h-6 w-64 mx-auto" />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[1, 2, 3].map((i) => (
+              <Card key={i} className="overflow-hidden">
+                <Skeleton className="h-48 w-full" />
+                <CardContent className="p-6">
+                  <div className="animate-pulse">
+                    <Skeleton className="h-6 w-32 mb-2" />
+                    <Skeleton className="h-4 w-24 mb-4" />
+                    <div className="flex items-center justify-between">
+                      <Skeleton className="h-8 w-16" />
+                      <Skeleton className="h-10 w-20" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-10">
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">Featured Deals from Venice & Treviso</h1>
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            Discover amazing flight deals departing from your local airports
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {deals?.map((deal) => (
+            <Card key={deal.id} className={`${getDealGradient(deal.dealType)} text-white overflow-hidden shadow-lg hover:shadow-xl transition-shadow`}>
+              <div 
+                className="h-48 relative bg-cover bg-center"
+                style={{
+                  backgroundImage: `url(${deal.imageUrl || 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad'})`,
+                }}
+              >
+                <div className="absolute inset-0 bg-black bg-opacity-40"></div>
+                <div className="absolute top-4 right-4">
+                  {getDealBadge(deal.dealType)}
+                </div>
+              </div>
+              <CardContent className="p-6">
+                <h3 className="text-xl font-bold mb-2">{deal.title}</h3>
+                <p className="text-white/80 mb-4">From {deal.fromAirport} • {deal.airline}</p>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className="text-2xl font-bold">{formatPrice(deal.dealPrice)}</span>
+                    <span className="text-white/60 line-through ml-2">{formatPrice(deal.originalPrice)}</span>
+                  </div>
+                  <Button variant="secondary" className="font-semibold">
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    View Deal
+                  </Button>
+                </div>
+                <div className="mt-4 text-sm text-white/80">
+                  Valid until: {new Date(deal.validUntil).toLocaleDateString()}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* Venice & Treviso Airport Info */}
+        <div className="mt-16 grid grid-cols-1 md:grid-cols-2 gap-8">
+          <Card>
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Venice Marco Polo Airport (VCE)</h3>
+              <p className="text-gray-600 mb-4">
+                Venice's main international airport, perfectly positioned for exploring Northern Italy and beyond.
+              </p>
+              <ul className="text-sm text-gray-600 space-y-2">
+                <li>• Direct flights to major European destinations</li>
+                <li>• Easy access to Venice city center via water bus</li>
+                <li>• Modern facilities and duty-free shopping</li>
+                <li>• Car rental and public transport connections</li>
+              </ul>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Treviso Airport (TSF)</h3>
+              <p className="text-gray-600 mb-4">
+                Budget-friendly airport serving the Veneto region with excellent low-cost carrier connections.
+              </p>
+              <ul className="text-sm text-gray-600 space-y-2">
+                <li>• Popular with budget airlines like Ryanair</li>
+                <li>• 40-minute bus ride to Venice</li>
+                <li>• Smaller, more manageable airport experience</li>
+                <li>• Great deals to European destinations</li>
+              </ul>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </div>
+  );
+}
