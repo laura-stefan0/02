@@ -27,7 +27,7 @@ const formSchema = z.object({
   filters: z.object({
     priceRange: z.array(z.number()).length(2).optional(),
     departureTime: z.array(z.string()).optional(),
-    stops: z.array(z.string()).optional(),
+    stops: z.string().optional(),
     maxDuration: z.array(z.number()).length(2).optional(),
     layoverDuration: z.array(z.string()).optional(),
   }).optional(),
@@ -54,9 +54,9 @@ export default function FlightSearchForm({ onSearchComplete }: FlightSearchFormP
       passengers: 1,
       filters: {
         priceRange: [0, 2000],
-        departureTime: ["morning", "afternoon", "evening"],
+        departureTime: ["night", "morning", "afternoon", "evening"],
         maxDuration: [0, 24],
-        stops: ["direct", "1-stop", "2plus-stops"],
+        stops: "direct",
         layoverDuration: ["none", "8plus", "24plus", "48plus"],
       },
     },
@@ -252,6 +252,7 @@ export default function FlightSearchForm({ onSearchComplete }: FlightSearchFormP
                                   <FormControl>
                                     <div className="space-y-2">
                                       {[
+                                        { value: "night", label: "Night (12AM - 6AM)" },
                                         { value: "morning", label: "Early Morning (6AM - 12PM)" },
                                         { value: "afternoon", label: "Afternoon (12PM - 6PM)" },
                                         { value: "evening", label: "Evening (6PM - 12AM)" },
@@ -290,20 +291,19 @@ export default function FlightSearchForm({ onSearchComplete }: FlightSearchFormP
                                         { value: "direct", label: "Direct" },
                                         { value: "1-stop", label: "1 Stop" },
                                         { value: "2plus-stops", label: "2+ Stops" },
+                                        { value: "any", label: "Any" },
                                       ].map((stop) => (
                                         <div key={stop.value} className="flex items-center space-x-2">
-                                          <Checkbox
-                                            checked={field.value?.includes(stop.value)}
-                                            onCheckedChange={(checked) => {
-                                              const currentValue = field.value || [];
-                                              if (checked) {
-                                                field.onChange([...currentValue, stop.value]);
-                                              } else {
-                                                field.onChange(currentValue.filter(v => v !== stop.value));
-                                              }
-                                            }}
+                                          <input
+                                            type="radio"
+                                            id={`stops-${stop.value}`}
+                                            name="stops"
+                                            value={stop.value}
+                                            checked={field.value === stop.value}
+                                            onChange={() => field.onChange(stop.value)}
+                                            className="h-4 w-4 text-brand-blue border-gray-300 focus:ring-brand-blue"
                                           />
-                                          <Label className="text-sm text-gray-700">{stop.label}</Label>
+                                          <Label htmlFor={`stops-${stop.value}`} className="text-sm text-gray-700 cursor-pointer">{stop.label}</Label>
                                         </div>
                                       ))}
                                     </div>
