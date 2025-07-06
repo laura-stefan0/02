@@ -73,7 +73,7 @@ export default function DestinationSelector({
 }: DestinationSelectorProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [showResults, setShowResults] = useState(false);
-  const [selectedValues, setSelectedValues<Array<{code: string; name: string; type: string; city?: string; country?: string}>>] = useState([]);
+  const [selectedValues, setSelectedValues] = useState<Array<{code: string; name: string; type: string; city?: string; country?: string}>>([]);
   const [recentlyAdded, setRecentlyAdded] = useState<string[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
