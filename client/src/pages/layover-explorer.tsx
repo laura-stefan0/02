@@ -109,63 +109,65 @@ export default function LayoverExplorer() {
           </div>
         )}
 
-        {/* Only show flights if airport is selected */}
+        {/* Layover Flights Section */}
         {!showAirportSelector && selectedAirport && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {layoverFlights?.map((flight) => (
-            <Card key={flight.id} className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow">
-              <div 
-                className="h-48 relative bg-cover bg-center"
-                style={{
-                  backgroundImage: `url(${flight.imageUrl})`,
-                }}
-              >
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                <div className="absolute bottom-4 left-4 text-white">
-                  <h3 className="text-xl font-bold">{flight.layoverCity}</h3>
-                  <div className="flex items-center mt-1">
-                    <Clock className="h-4 w-4 mr-1" />
-                    <span>{flight.layoverDuration} layover</span>
+          <div className="mt-16">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {layoverFlights?.map((flight) => (
+                <Card key={flight.id} className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow">
+                  <div 
+                    className="h-48 relative bg-cover bg-center"
+                    style={{
+                      backgroundImage: `url(${flight.imageUrl})`,
+                    }}
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                    <div className="absolute bottom-4 left-4 text-white">
+                      <h3 className="text-xl font-bold">{flight.layoverCity}</h3>
+                      <div className="flex items-center mt-1">
+                        <Clock className="h-4 w-4 mr-1" />
+                        <span>{flight.layoverDuration} layover</span>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
-              <CardContent className="p-6">
-                <div className="mb-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="font-semibold text-gray-900">{selectedAirport} → {flight.route.split(' → ')[1]}</span>
-                    <span className="text-brand-blue font-bold text-xl">{formatPrice(flight.price)}</span>
-                  </div>
-                  <p className="text-sm text-gray-600">{flight.airline} • Next departure: {flight.nextDeparture}</p>
-                </div>
-                
-                <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-4">
-                  <h4 className="font-semibold text-amber-800 mb-2 flex items-center">
-                    <MapPin className="h-4 w-4 mr-2" />
-                    What you can do in {flight.layoverDuration}:
-                  </h4>
-                  <ul className="text-sm text-amber-700 space-y-1">
-                    {flight.activities.map((activity, index) => (
-                      <li key={index} className="flex items-start">
-                        <CheckCircle className="h-3 w-3 mr-2 mt-0.5 flex-shrink-0" />
-                        <span>{activity}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+                  <CardContent className="p-6">
+                    <div className="mb-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-semibold text-gray-900">{selectedAirport} → {flight.route.split(' → ')[1]}</span>
+                        <span className="text-brand-blue font-bold text-xl">{formatPrice(flight.price)}</span>
+                      </div>
+                      <p className="text-sm text-gray-600">{flight.airline} • Next departure: {flight.nextDeparture}</p>
+                    </div>
+                    
+                    <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-4">
+                      <h4 className="font-semibold text-amber-800 mb-2 flex items-center">
+                        <MapPin className="h-4 w-4 mr-2" />
+                        What you can do in {flight.layoverDuration}:
+                      </h4>
+                      <ul className="text-sm text-amber-700 space-y-1">
+                        {flight.activities.map((activity, index) => (
+                          <li key={index} className="flex items-start">
+                            <CheckCircle className="h-3 w-3 mr-2 mt-0.5 flex-shrink-0" />
+                            <span>{activity}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
 
-                <div className="flex items-center justify-between">
-                  <Badge variant="secondary" className="bg-blue-100 text-blue-800">
-                    <Clock className="h-3 w-3 mr-1" />
-                    Long Layover
-                  </Badge>
-                  <Button className="bg-brand-blue hover:bg-brand-blue-dark">
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    Book This Adventure
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                    <div className="flex items-center justify-between">
+                      <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                        <Clock className="h-3 w-3 mr-1" />
+                        Long Layover
+                      </Badge>
+                      <Button className="bg-brand-blue hover:bg-brand-blue-dark">
+                        <ExternalLink className="h-4 w-4 mr-2" />
+                        Book This Adventure
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
         )}
 

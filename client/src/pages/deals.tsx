@@ -129,49 +129,52 @@ export default function Deals() {
           </div>
         )}
 
-        {/* Only show deals if airport is selected */}
+        {/* Deals Section */}
         {!showAirportSelector && selectedAirport && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {deals?.map((deal) => (
-            <Card key={deal.id} className={`${getDealGradient(deal.dealType)} overflow-hidden`}>
-              <div 
-                className="h-48 relative bg-cover bg-center"
-                style={{
-                  backgroundImage: `url(${deal.imageUrl || 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad'})`,
-                }}
-              >
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                <div className="absolute top-4 right-4">
-                  {getDealBadge(deal.dealType)}
-                </div>
-                <div className="absolute bottom-4 left-4 text-white">
-                  <h3 className="text-xl font-bold">{deal.title}</h3>
-                  <p className="text-white/90">From {selectedAirport} • {deal.airline}</p>
-                </div>
-              </div>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <span className="text-2xl font-bold text-brand-blue">{formatPrice(deal.dealPrice)}</span>
-                    <span className="text-gray-500 line-through ml-2">{formatPrice(deal.originalPrice)}</span>
+          <div className="mt-16">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {deals?.map((deal) => (
+                <Card key={deal.id} className={`${getDealGradient(deal.dealType)} overflow-hidden`}>
+                  <div 
+                    className="h-48 relative bg-cover bg-center"
+                    style={{
+                      backgroundImage: `url(${deal.imageUrl || 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad'})`,
+                    }}
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                    <div className="absolute top-4 right-4">
+                      {getDealBadge(deal.dealType)}
+                    </div>
+                    <div className="absolute bottom-4 left-4 text-white">
+                      <h3 className="text-xl font-bold">{deal.title}</h3>
+                      <p className="text-white/90">From {selectedAirport} • {deal.airline}</p>
+                    </div>
                   </div>
-                  <Button className="bg-brand-blue hover:bg-brand-blue-dark">
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    View Deal
-                  </Button>
-                </div>
-                <div className="text-sm text-gray-600">
-                  Valid until: {new Date(deal.validUntil).toLocaleDateString()}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <div>
+                        <span className="text-2xl font-bold text-brand-blue">{formatPrice(deal.dealPrice)}</span>
+                        <span className="text-gray-500 line-through ml-2">{formatPrice(deal.originalPrice)}</span>
+                      </div>
+                      <Button className="bg-brand-blue hover:bg-brand-blue-dark">
+                        <ExternalLink className="h-4 w-4 mr-2" />
+                        View Deal
+                      </Button>
+                    </div>
+                    <div className="text-sm text-gray-600">
+                      Valid until: {new Date(deal.validUntil).toLocaleDateString()}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
         )}
 
-        {/* Venice & Treviso Airport Info */}
+        {/* Airport Information Section */}
         {!showAirportSelector && selectedAirport && (
-        <div className="mt-16 grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="mt-24">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <Card>
             <CardContent className="p-6">
               <h3 className="text-xl font-bold text-gray-900 mb-4">Venice Marco Polo Airport (VCE)</h3>
@@ -201,6 +204,7 @@ export default function Deals() {
               </ul>
             </CardContent>
           </Card>
+            </div>
           </div>
         )}
       </div>
