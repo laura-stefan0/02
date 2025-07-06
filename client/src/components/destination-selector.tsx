@@ -173,12 +173,11 @@ export default function DestinationSelector({
 
   // European regions for "anywhere" mode
   const regions = [
-    { code: "europe", name: "Anywhere in Europe" },
+    { code: "europe", name: "Europe" },
     { code: "mediterranean", name: "Mediterranean" },
     { code: "northern-europe", name: "Northern Europe" },
     { code: "western-europe", name: "Western Europe" },
     { code: "eastern-europe", name: "Eastern Europe" },
-    { code: "worldwide", name: "Anywhere in the world" },
   ];
   
   // Filter destinations based on search term
@@ -199,6 +198,18 @@ export default function DestinationSelector({
     { code: "anywhere:europe", name: "Europe", city: "", country: "", type: "anywhere" },
   ].filter(option => option.name.toLowerCase().includes(searchTerm.toLowerCase())) : [];
 
+  // Popular destinations to show when no search term
+  const popularDestinations = [
+    { code: "CDG", name: "Paris Charles de Gaulle", city: "Paris", country: "France", type: "airport" },
+    { code: "LHR", name: "London Heathrow", city: "London", country: "United Kingdom", type: "airport" },
+    { code: "BCN", name: "Barcelona", city: "Barcelona", country: "Spain", type: "airport" },
+    { code: "AMS", name: "Amsterdam", city: "Amsterdam", country: "Netherlands", type: "airport" },
+    { code: "BER", name: "Berlin Brandenburg", city: "Berlin", country: "Germany", type: "airport" },
+    { code: "FCO", name: "Rome Fiumicino", city: "Rome", country: "Italy", type: "airport" },
+    { code: "EUROPE", name: "Europe", city: "", country: "", type: "region" },
+    { code: "ASIA", name: "Asia", city: "", country: "", type: "region" },
+  ];
+
   // Sort filtered destinations by priority: regions, countries, cities, then airports
   const sortedDestinations = filteredDestinations.sort((a, b) => {
     const typePriority = { region: 1, country: 2, airport: 3, anywhere: 0 };
@@ -213,8 +224,9 @@ export default function DestinationSelector({
     return a.name.localeCompare(b.name);
   });
 
-  // Combine anywhere options (first) with sorted destinations
-  const allResults = [...anywhereOptions, ...sortedDestinations];
+  // Show popular destinations when no search term, otherwise show search results
+  const searchResults = searchTerm ? [...anywhereOptions, ...sortedDestinations] : popularDestinations;
+  const allResults = searchResults;
 
   const handleDestinationSelect = (destination: { code: string; name: string }) => {
     const displayValue = destination.type === "airport" 
@@ -230,12 +242,16 @@ export default function DestinationSelector({
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
     setSearchTerm(newValue);
-    setShowResults(newValue.length > 0);
+    setShowResults(true); // Always show results when typing
     
     if (newValue === "") {
       setSelectedValue("");
       onChange("");
     }
+  };
+
+  const handleInputClick = () => {
+    setShowResults(true);
   };
 
   const handleClear = () => {
@@ -292,9 +308,8 @@ export default function DestinationSelector({
           value={getDisplayValue()}
           placeholder={placeholder}
           onChange={handleInputChange}
-          onFocus={() => {
-            if (searchTerm) setShowResults(true);
-          }}
+          onClick={handleInputClick}
+          onFocus={handleInputClick}
           className={cn(
             "w-full h-12 pl-10 pr-10",
             !getDisplayValue() && "text-muted-foreground"
@@ -312,7 +327,7 @@ export default function DestinationSelector({
       </div>
 
       {/* Results dropdown */}
-      {showResults && allResults.length > 0 && (
+      {showResults && (
         <div 
           ref={resultsRef}
           className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-64 overflow-y-auto"
