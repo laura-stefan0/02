@@ -117,24 +117,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           layoverAirport: "DXB",
           departureTime: "08:15",
           nextDeparture: "Tomorrow 08:15",
-
-
-  // Airport search using Amadeus
-  app.get("/api/airports/search", async (req, res) => {
-    try {
-      const { q } = req.query;
-      if (!q || typeof q !== 'string') {
-        return res.status(400).json({ message: "Search query is required" });
-      }
-      
-      const suggestions = await amadeusService.getAirportSuggestions(q);
-      res.json(suggestions);
-    } catch (error) {
-      console.error("Airport search error:", error);
-      res.status(500).json({ message: "Failed to search airports" });
-    }
-  });
-
           activities: [
             "Visit Burj Khalifa and Dubai Mall",
             "Explore Dubai Marina and beaches", 
@@ -167,6 +149,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Get long layovers error:", error);
       res.status(500).json({ message: "Failed to fetch long layover flights" });
+    }
+  });
+
+  // Airport search using Amadeus
+  app.get("/api/airports/search", async (req, res) => {
+    try {
+      const { q } = req.query;
+      if (!q || typeof q !== 'string') {
+        return res.status(400).json({ message: "Search query is required" });
+      }
+      
+      const suggestions = await amadeusService.getAirportSuggestions(q);
+      res.json(suggestions);
+    } catch (error) {
+      console.error("Airport search error:", error);
+      res.status(500).json({ message: "Failed to search airports" });
     }
   });
 
