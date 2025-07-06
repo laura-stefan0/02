@@ -165,45 +165,6 @@ export default function DepartureDateSelector({ value, onChange, placeholder = "
           </button>
         </div>
 
-        {/* Quick access buttons always visible */}
-        <div className="p-3 border-b bg-gray-50">
-          <div className="grid grid-cols-2 gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handlePeriodSelect("7")}
-              className="text-xs"
-            >
-              Next 7 days
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handlePeriodSelect("30")}
-              className="text-xs"
-            >
-              Next month
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handlePeriodSelect("90")}
-              className="text-xs"
-            >
-              Next 3 months
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleAnytimeSelect}
-              className="text-xs"
-            >
-              <Infinity className="h-3 w-3 mr-1" />
-              Anytime
-            </Button>
-          </div>
-        </div>
-
         {/* Main content area */}
         <div className="p-0">
           {mode === "specific" && (
@@ -233,7 +194,7 @@ export default function DepartureDateSelector({ value, onChange, placeholder = "
           {mode === "period" && (
             <div className="p-4 space-y-4">
               <Label className="text-sm font-medium text-gray-700">
-                Select custom time period
+                Select time period
               </Label>
               <div className="grid grid-cols-2 gap-2">
                 <Button
@@ -241,42 +202,42 @@ export default function DepartureDateSelector({ value, onChange, placeholder = "
                   size="sm"
                   onClick={() => handlePeriodSelect("7")}
                 >
-                  7 days
+                  Next 7 days
                 </Button>
                 <Button
                   variant={selectedPeriod === "14" ? "default" : "outline"}
                   size="sm"
                   onClick={() => handlePeriodSelect("14")}
                 >
-                  2 weeks
+                  Next 2 weeks
                 </Button>
                 <Button
                   variant={selectedPeriod === "30" ? "default" : "outline"}
                   size="sm"
                   onClick={() => handlePeriodSelect("30")}
                 >
-                  1 month
+                  Next month
                 </Button>
                 <Button
                   variant={selectedPeriod === "60" ? "default" : "outline"}
                   size="sm"
                   onClick={() => handlePeriodSelect("60")}
                 >
-                  2 months
+                  Next 2 months
                 </Button>
                 <Button
                   variant={selectedPeriod === "90" ? "default" : "outline"}
                   size="sm"
                   onClick={() => handlePeriodSelect("90")}
                 >
-                  3 months
+                  Next 3 months
                 </Button>
                 <Button
                   variant={selectedPeriod === "180" ? "default" : "outline"}
                   size="sm"
                   onClick={() => handlePeriodSelect("180")}
                 >
-                  6 months
+                  Next 6 months
                 </Button>
               </div>
             </div>

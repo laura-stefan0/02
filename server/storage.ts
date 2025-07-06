@@ -149,6 +149,8 @@ export class MemStorage implements IStorage {
       stops: insertResult.stops || 0,
       layoverAirport: insertResult.layoverAirport || null,
       layoverDuration: insertResult.layoverDuration || null,
+      currency: insertResult.currency || "EUR",
+      isLongLayover: insertResult.isLongLayover || false,
       amenities: insertResult.amenities as string[] || null,
     };
     this.flightResults.set(id, result);
