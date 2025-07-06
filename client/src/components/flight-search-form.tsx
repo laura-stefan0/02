@@ -107,23 +107,16 @@ export default function FlightSearchForm({ onSearchComplete }: FlightSearchFormP
   return (
     <div className="relative">
       {/* Hero Background */}
-      <div 
-        className="absolute inset-0 bg-gradient-to-br from-blue-600 to-blue-800 opacity-90"
-        style={{
-          backgroundImage: "url('https://images.unsplash.com/photo-1436491865332-7a61a109cc05?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&h=1080')",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
-      />
+      <div className="absolute inset-0 bg-blue-700" />
 
       <div className="relative py-6 lg:py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-6">
             <h2 className="text-4xl lg:text-6xl font-bold text-white mb-4">
-              Find Your Perfect Flight
+              Hack your next flight
             </h2>
             <p className="text-xl text-blue-100 max-w-2xl mx-auto">
-              Discover the best deals on flights worldwide with our smart search technology
+              Use advanced filters to find smarter routes, better fares, and clever layovers others miss.
             </p>
           </div>
 
