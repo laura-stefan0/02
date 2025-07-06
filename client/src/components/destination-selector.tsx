@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+
 import { cn } from "@/lib/utils";
 
 interface DestinationSelectorProps {
@@ -21,7 +21,6 @@ export default function DestinationSelector({
   label = "To"
 }: DestinationSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [mode, setMode] = useState<"specific" | "anywhere">("specific");
   const [searchTerm, setSearchTerm] = useState("");
 
   // Comprehensive destinations including cities, airports, countries, and regions
@@ -96,21 +95,31 @@ export default function DestinationSelector({
     { code: "worldwide", name: "Anywhere in the world" },
   ];
 
+  // Check if this is the "From" field to determine behavior
+  const isFromField = label === "From";
+  
+  // Filter destinations based on search term
   const filteredDestinations = allDestinations.filter(dest => {
-    if (!searchTerm) return false; // Show nothing when no search term for "From" field
+    if (!searchTerm) return !isFromField; // Show popular destinations for "To", nothing for "From"
     
     const search = searchTerm.toLowerCase();
     return (
       dest.name.toLowerCase().includes(search) ||
       dest.code.toLowerCase().includes(search) ||
       dest.city.toLowerCase().includes(search) ||
-      dest.country.toLowerCase().includes(search) ||
-      (dest.type === "region" && dest.name.toLowerCase().includes(search))
+      dest.country.toLowerCase().includes(search)
     );
   });
 
-  // For "To" field, show popular destinations when no search term
-  const isFromField = label === "From";
+  // Add "Anywhere" options when searching
+  const anywhereOptions = searchTerm ? [
+    { code: "anywhere:worldwide", name: "Anywhere in the world", city: "", country: "", type: "anywhere" },
+    { code: "anywhere:europe", name: "Anywhere in Europe", city: "", country: "", type: "anywhere" },
+  ].filter(option => option.name.toLowerCase().includes(searchTerm.toLowerCase())) : [];
+
+  // Combine filtered destinations with anywhere options
+  const allResults = [...filteredDestinations, ...anywhereOptions];
+
   const popularDestinations = allDestinations.filter(dest => dest.type === "airport").slice(0, 8);
 
   const handleDestinationSelect = (destination: { code: string; name: string }) => {
@@ -161,172 +170,88 @@ export default function DestinationSelector({
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-96 p-0" align="start">
-        {/* Tab navigation */}
-        <div className="flex border-b">
-          <button
-            onClick={() => setMode("specific")}
-            className={cn(
-              "flex-1 px-3 py-2 text-sm font-medium border-b-2 transition-colors",
-              mode === "specific" 
-                ? "border-blue-500 text-blue-600 bg-blue-50" 
-                : "border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50"
-            )}
-          >
-            Destinations
-          </button>
-          <button
-            onClick={() => setMode("anywhere")}
-            className={cn(
-              "flex-1 px-3 py-2 text-sm font-medium border-b-2 transition-colors",
-              mode === "anywhere" 
-                ? "border-blue-500 text-blue-600 bg-blue-50" 
-                : "border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50"
-            )}
-          >
-            Anywhere
-          </button>
-        </div>
-
-        {/* Quick access regions always visible */}
-        <div className="p-3 border-b bg-gray-50">
-          <div className="grid grid-cols-2 gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handleRegionSelect({ code: "europe", name: "Anywhere in Europe" })}
-              className="text-xs"
-            >
-              <Globe className="h-3 w-3 mr-1" />
-              Europe
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handleRegionSelect({ code: "mediterranean", name: "Mediterranean" })}
-              className="text-xs"
-            >
-              <Globe className="h-3 w-3 mr-1" />
-              Mediterranean
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handleRegionSelect({ code: "northern-europe", name: "Northern Europe" })}
-              className="text-xs"
-            >
-              <Globe className="h-3 w-3 mr-1" />
-              Northern
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handleRegionSelect({ code: "worldwide", name: "Anywhere in the world" })}
-              className="text-xs"
-            >
-              <Globe className="h-3 w-3 mr-1" />
-              Worldwide
-            </Button>
-          </div>
-        </div>
-
-        {/* Search bar always visible */}
+        {/* Search bar */}
         <div className="p-3 border-b">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
             <Input
-              placeholder="Search destinations..."
+              placeholder={isFromField ? "Search destinations..." : "Search destinations..."}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
+              autoFocus={isFromField}
             />
           </div>
         </div>
 
-        <div className="p-0">
-          {mode === "specific" && (
-            <div className="max-h-64 overflow-y-auto">
-              {searchTerm ? (
-                // Show filtered results when typing
-                <>
-                  {filteredDestinations.map((destination) => (
-                    <button
-                      key={destination.code}
-                      onClick={() => handleDestinationSelect(destination)}
-                      className="w-full text-left p-3 hover:bg-gray-50 flex items-center justify-between border-b border-gray-100 last:border-b-0"
-                    >
-                      <div>
-                        <div className="font-medium">{destination.name}</div>
-                        <div className="text-sm text-gray-500">
-                          {destination.type === "airport" && destination.city && `${destination.city}, `}
-                          {destination.country}
-                          {destination.type === "region" && " • Region"}
-                          {destination.type === "country" && " • Country"}
-                        </div>
-                      </div>
-                      <div className="text-sm font-mono text-gray-400">
-                        {destination.type === "airport" ? destination.code : ""}
-                      </div>
-                    </button>
-                  ))}
-                  {filteredDestinations.length === 0 && (
-                    <div className="p-3 text-center text-gray-500">
-                      No destinations found for "{searchTerm}"
+        {/* Results */}
+        <div className="max-h-64 overflow-y-auto">
+          {searchTerm ? (
+            // Show filtered results when typing
+            <>
+              {allResults.map((destination) => (
+                <button
+                  key={destination.code}
+                  onClick={() => {
+                    if (destination.type === "anywhere") {
+                      handleRegionSelect(destination);
+                    } else {
+                      handleDestinationSelect(destination);
+                    }
+                  }}
+                  className="w-full text-left p-3 hover:bg-gray-50 flex items-center justify-between border-b border-gray-100 last:border-b-0"
+                >
+                  <div>
+                    <div className="font-medium">{destination.name}</div>
+                    <div className="text-sm text-gray-500">
+                      {destination.type === "airport" && destination.city && `${destination.city}, `}
+                      {destination.country}
+                      {destination.type === "region" && " • Region"}
+                      {destination.type === "country" && " • Country"}
+                      {destination.type === "anywhere" && " • Anywhere"}
                     </div>
-                  )}
-                </>
-              ) : (
-                // Show popular destinations only for "To" field when no search term
-                <>
-                  {!isFromField && (
-                    <div className="p-3">
-                      <Label className="text-sm font-medium text-gray-700 mb-2 block">
-                        Popular destinations
-                      </Label>
-                      <div className="grid grid-cols-2 gap-2">
-                        {popularDestinations.slice(0, 6).map((destination) => (
-                          <Button
-                            key={destination.code}
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleDestinationSelect(destination)}
-                            className="text-xs justify-start"
-                          >
-                            {destination.city || destination.name}
-                          </Button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  {isFromField && (
-                    <div className="p-3 text-center text-gray-500">
-                      Start typing to search for destinations...
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
-          )}
-
-          {mode === "anywhere" && (
-            <div className="max-h-64 overflow-y-auto">
-              <div className="p-3">
-                <Label className="text-sm font-medium text-gray-700 mb-2 block">
-                  Explore by region
-                </Label>
-                <div className="space-y-2">
-                  {regions.map((region) => (
-                    <button
-                      key={region.code}
-                      onClick={() => handleRegionSelect(region)}
-                      className="w-full text-left p-2 hover:bg-gray-50 flex items-center gap-3 rounded border border-gray-200"
-                    >
-                      <Globe className="h-4 w-4 text-blue-500" />
-                      <span className="font-medium text-sm">{region.name}</span>
-                    </button>
-                  ))}
+                  </div>
+                  <div className="text-sm font-mono text-gray-400">
+                    {destination.type === "airport" ? destination.code : 
+                     destination.type === "anywhere" ? <Globe className="h-4 w-4" /> : ""}
+                  </div>
+                </button>
+              ))}
+              {allResults.length === 0 && (
+                <div className="p-3 text-center text-gray-500">
+                  No destinations found for "{searchTerm}"
                 </div>
-              </div>
-            </div>
+              )}
+            </>
+          ) : (
+            // Show popular destinations only for "To" field when no search term
+            <>
+              {!isFromField && (
+                <div className="p-3">
+                  <Label className="text-sm font-medium text-gray-700 mb-2 block">
+                    Popular destinations
+                  </Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {popularDestinations.slice(0, 6).map((destination) => (
+                      <Button
+                        key={destination.code}
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDestinationSelect(destination)}
+                        className="text-xs justify-start"
+                      >
+                        {destination.city || destination.name}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {isFromField && (
+                <div className="p-3 text-center text-gray-500">
+                  Start typing to search for destinations...
+                </div>
+              )}
+            </>
           )}
         </div>
       </PopoverContent>
