@@ -45,6 +45,7 @@ export default function FlightSearchForm({ onSearchComplete }: FlightSearchFormP
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
+    mode: "onSubmit", // Only validate on submit, not on change
     defaultValues: {
       fromAirport: "",
       toAirport: "",
@@ -56,7 +57,7 @@ export default function FlightSearchForm({ onSearchComplete }: FlightSearchFormP
         departureTime: ["morning", "afternoon", "evening"],
         maxDuration: [0, 24],
         stops: ["direct", "1-stop", "2plus-stops"],
-        layoverDuration: ["none", "short", "8plus", "24plus", "48plus"],
+        layoverDuration: ["none", "8plus", "24plus", "48plus"],
       },
     },
   });
@@ -353,7 +354,6 @@ export default function FlightSearchForm({ onSearchComplete }: FlightSearchFormP
                                     <div className="space-y-2">
                                       {[
                                         { value: "none", label: "No layover" },
-                                        { value: "short", label: "Less than 2 hours" },
                                         { value: "8plus", label: "8+ hours" },
                                         { value: "24plus", label: "24+ hours" },
                                         { value: "48plus", label: "48+ hours" },
