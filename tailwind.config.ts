@@ -61,6 +61,17 @@ export default {
           border: "var(--sidebar-border)",
           ring: "var(--sidebar-ring)",
         },
+        brand: {
+          primary: "var(--brand-primary)",
+          "primary-dark": "var(--brand-primary-dark)",
+          secondary: "var(--brand-secondary)",
+          accent: "var(--brand-accent)",
+          success: "var(--brand-success)",
+          info: "var(--brand-info)",
+          warning: "var(--brand-warning)",
+          surface: "var(--brand-surface)",
+          "surface-secondary": "var(--brand-surface-secondary)",
+        },
       },
       keyframes: {
         "accordion-down": {

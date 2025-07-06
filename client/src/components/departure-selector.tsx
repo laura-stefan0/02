@@ -334,8 +334,8 @@ export default function DepartureSelector({
     <div className="relative">
       <div className="relative">
         <div className={cn(
-          "relative flex items-center min-h-[48px] border border-gray-300 rounded-md bg-white px-3 py-2 transition-all duration-200 hover:border-blue-400",
-          showResults && "border-blue-500 shadow-md ring-1 ring-blue-500 ring-opacity-20"
+          "relative flex items-center min-h-[48px] border border-gray-300 rounded-md bg-white px-3 py-2 transition-all duration-200 hover:border-brand-primary/60",
+          showResults && "border-brand-primary shadow-md ring-1 ring-brand-primary ring-opacity-20"
         )}>
           <MapPin className="h-4 w-4 text-gray-500 mr-2 flex-shrink-0" />
           
@@ -347,7 +347,7 @@ export default function DepartureSelector({
                    style={{ scrollBehavior: 'smooth' }}>
                 {selectedValues.map((destination, index) => (
                   <div key={destination.code} className="flex items-center gap-1 flex-shrink-0">
-                    <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-medium whitespace-nowrap flex items-center gap-1">
+                    <span className="bg-brand-secondary/10 text-brand-primary px-2 py-1 rounded text-xs font-medium whitespace-nowrap flex items-center gap-1">
                       {getDisplayName(destination)}
                       <button
                         onClick={() => handleDestinationRemove(destination.code)}
