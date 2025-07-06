@@ -1,22 +1,42 @@
 import { useState, useEffect } from "react";
-import { ExternalLink, Percent, Star, Clock, MapPin } from "lucide-react";
+import { ExternalLink, Percent, Star, Clock, MapPin, ChevronDown, Plane } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Input } from "@/components/ui/input";
 import { useFlightDeals } from "@/hooks/use-flight-search";
 import AirportSelector from "@/components/airport-selector";
 import { getNearestAirport, defaultDepartureAirports } from "@/lib/geolocation";
+import { airports } from "@/lib/airports";
 
 export default function Deals() {
   const [selectedAirport, setSelectedAirport] = useState<string | null>(null);
   const [showAirportSelector, setShowAirportSelector] = useState(true);
+  const [showAirportPopover, setShowAirportPopover] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
   const { data: deals, isLoading } = useFlightDeals();
 
   const handleAirportChange = (airport: { code: string; name: string; city: string; country: string }) => {
     setSelectedAirport(airport.code);
     setShowAirportSelector(false);
+    setShowAirportPopover(false);
+    setSearchTerm("");
   };
+
+  const handleAirportSelect = (airportCode: string) => {
+    const airport = airports.find(a => a.code === airportCode);
+    if (airport) {
+      handleAirportChange(airport);
+    }
+  };
+
+  const filteredAirports = airports.filter(airport =>
+    airport.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    airport.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    airport.city.toLowerCase().includes(searchTerm.toLowerCase())
+  ).slice(0, 10);
 
   const formatPrice = (price: number) => {
     return `€${(price / 100).toFixed(0)}`;
@@ -86,17 +106,48 @@ export default function Deals() {
             </div>
           ) : (
             <div className="text-center">
-              <h1 className="text-4xl font-bold text-gray-900 mb-2">
-                Featured Deals from {selectedAirport || 'Your Area'}
-                {selectedAirport && (
-                  <button 
-                    onClick={() => setShowAirportSelector(true)}
-                    className="ml-3 text-lg text-blue-600 hover:text-blue-800 transition-colors"
-                    title="Change airport"
-                  >
-                    ✏️
-                  </button>
-                )}
+              <h1 className="text-4xl font-bold text-gray-900 mb-2 flex items-center justify-center gap-3">
+                Featured Deals from 
+                <Popover open={showAirportPopover} onOpenChange={setShowAirportPopover}>
+                  <PopoverTrigger asChild>
+                    <button className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-colors text-base font-normal">
+                      <Plane className="h-4 w-4 text-gray-500" />
+                      {selectedAirport || 'Your Area'}
+                      <ChevronDown className="h-4 w-4 text-gray-500" />
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-80 p-0" align="center">
+                    <div className="p-4">
+                      <Input
+                        placeholder="Search airports..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="mb-3"
+                      />
+                      <div className="max-h-64 overflow-y-auto space-y-1">
+                        {filteredAirports.map((airport) => (
+                          <button
+                            key={airport.code}
+                            onClick={() => handleAirportSelect(airport.code)}
+                            className="w-full p-3 text-left hover:bg-gray-50 rounded-lg transition-colors border border-transparent hover:border-gray-200"
+                          >
+                            <div className="font-medium text-gray-900">
+                              {airport.name} ({airport.code})
+                            </div>
+                            <div className="text-sm text-gray-600">
+                              {airport.city}, {airport.country}
+                            </div>
+                          </button>
+                        ))}
+                        {filteredAirports.length === 0 && searchTerm && (
+                          <div className="p-3 text-center text-gray-500">
+                            No airports found
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </PopoverContent>
+                </Popover>
               </h1>
               <p className="text-xl text-gray-600">
                 Discover amazing flight deals departing from your closest airport
