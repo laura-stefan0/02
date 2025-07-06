@@ -88,6 +88,7 @@ export default function Deals() {
             onAirportChange={handleAirportChange}
             title="Select Your Departure Airport"
             subtitle="We'll show you the best deals from your chosen airport"
+            onBack={() => setShowAirportSelector(false)}
           />
         )}
 
