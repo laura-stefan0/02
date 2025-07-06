@@ -195,10 +195,10 @@ export default function FlightResults({ results, isLoading }: FlightResultsProps
             </h3>
             {(results as any)?.dataSource && (
               <Badge 
-                variant={((results as any).dataSource === 'amadeus') ? 'default' : 'secondary'}
-                className={((results as any).dataSource === 'amadeus') ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800'}
+                variant={((results as any).dataSource === 'sky-scrapper') ? 'default' : 'secondary'}
+                className={((results as any).dataSource === 'sky-scrapper') ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800'}
               >
-                {((results as any).dataSource === 'amadeus') ? '✅ Real Amadeus Data' : '🎭 Mock Data'}
+                {((results as any).dataSource === 'sky-scrapper') ? '✅ Real Sky Scrapper Data' : '🎭 Mock Data'}
               </Badge>
             )}
             {/* Debug info - remove this later */}

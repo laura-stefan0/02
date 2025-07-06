@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertFlightSearchSchema } from "@shared/schema";
-import { amadeusService } from "./lib/amadeus";
+import { skyScrapperService } from "./lib/sky-scrapper";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Flight search - Amadeus API only
@@ -25,10 +25,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const toAirport = Array.isArray(searchData.toAirport) ? searchData.toAirport[0] : searchData.toAirport;
 
       let results = [];
-      let dataSource = 'amadeus';
+      let dataSource = 'sky-scrapper';
       
       try {
-        // Validate date format for Amadeus API (must be YYYY-MM-DD)
+        // Validate date format (must be YYYY-MM-DD)
         const departureDateRegex = /^\d{4}-\d{2}-\d{2}$/;
         if (!departureDateRegex.test(searchData.departureDate)) {
           throw new Error(`Invalid departure date format: ${searchData.departureDate}. Expected YYYY-MM-DD`);
@@ -39,10 +39,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           throw new Error(`Invalid return date format: ${searchData.returnDate}. Expected YYYY-MM-DD`);
         }
 
-        console.log('🚀 Attempting Amadeus API call...');
+        console.log('🚀 Attempting Sky Scrapper API call...');
         
-        // Try real Amadeus API first
-        results = await amadeusService.searchFlights({
+        // Try Sky Scrapper API first
+        results = await skyScrapperService.searchFlights({
           originLocationCode: fromAirport,
           destinationLocationCode: toAirport,
           departureDate: searchData.departureDate,
@@ -51,11 +51,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           max: 10
         });
         
-        console.log('✅ Successfully used REAL Amadeus data!');
+        console.log('✅ Successfully used REAL Sky Scrapper data!');
         console.log(`📈 Results count: ${results.length}`);
         
       } catch (error) {
-        console.error("❌ Amadeus API failed, falling back to mock data:", error);
+        console.error("❌ Sky Scrapper API failed, falling back to mock data:", error);
         dataSource = 'mock';
         // Fallback to mock data if API fails
         results = generateMockFlightResults(fromAirport, toAirport, searchData.departureDate, searchData.returnDate);
@@ -81,7 +81,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         search,
         results,
         count: results.length,
-        dataSource, // Include whether data came from 'amadeus' or 'mock'
+        dataSource, // Include whether data came from 'sky-scrapper' or 'mock'
       };
       
       res.json(response);
@@ -191,7 +191,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: 'Search query required' });
       }
 
-      const suggestions = await amadeusService.getAirportSuggestions(q);
+      const suggestions = await skyScrapperService.getAirportSuggestions(q);
       res.json(suggestions);
     } catch (error) {
       console.error('Airport search error:', error);
