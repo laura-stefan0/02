@@ -309,6 +309,14 @@ export default function DepartureSelector({
     return destination.name;
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Backspace' && searchTerm === '' && selectedValues.length > 0) {
+      // Remove the last selected item when backspace is pressed and input is empty
+      const lastItem = selectedValues[selectedValues.length - 1];
+      handleDestinationRemove(lastItem.code);
+    }
+  };
+
   // Handle clicks outside to close results
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -364,6 +372,7 @@ export default function DepartureSelector({
               onChange={handleInputChange}
               onClick={handleInputClick}
               onFocus={handleInputClick}
+              onKeyDown={handleKeyDown}
               className={cn(
                 "bg-transparent outline-none placeholder:text-gray-400 text-sm flex-1 min-w-[100px]",
                 selectedValues.length > 0 && "ml-2"
