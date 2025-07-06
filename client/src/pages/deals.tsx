@@ -72,23 +72,39 @@ export default function Deals() {
   return (
     <div className="py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-10">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Featured Deals {selectedAirport ? `from ${selectedAirport}` : 'from Your Area'}
-          </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Discover amazing flight deals departing from your closest airport
-          </p>
-        </div>
-
-        {/* Airport Selector */}
-        {showAirportSelector && (
-          <AirportSelector
-            selectedAirport={selectedAirport}
-            onAirportChange={handleAirportChange}
-            title="Select Your Departure Airport"
-            subtitle="We'll show you the best deals from your chosen airport"
-          />
+        {/* Header Section with Title and Airport Selector */}
+        {showAirportSelector ? (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+            {/* Left Column - Title and Subtitle */}
+            <div className="flex flex-col justify-center">
+              <h1 className="text-4xl font-bold text-gray-900 mb-4">
+                Featured Deals {selectedAirport ? `from ${selectedAirport}` : 'from Your Area'}
+              </h1>
+              <p className="text-xl text-gray-600">
+                Discover amazing flight deals departing from your closest airport
+              </p>
+            </div>
+            
+            {/* Right Column - Airport Selector */}
+            <div>
+              <AirportSelector
+                selectedAirport={selectedAirport}
+                onAirportChange={handleAirportChange}
+                title="Select Your Departure Airport"
+                subtitle="We'll show you the best deals from your chosen airport"
+                onBack={() => setShowAirportSelector(false)}
+              />
+            </div>
+          </div>
+        ) : (
+          <div className="text-center mb-10">
+            <h1 className="text-4xl font-bold text-gray-900 mb-4">
+              Featured Deals {selectedAirport ? `from ${selectedAirport}` : 'from Your Area'}
+            </h1>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Discover amazing flight deals departing from your closest airport
+            </p>
+          </div>
         )}
 
         {/* Change Airport Button */}
