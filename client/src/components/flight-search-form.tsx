@@ -76,10 +76,10 @@ export default function FlightSearchForm({ onSearchComplete }: FlightSearchFormP
     // Handle both string and array values
     const fromAirports = Array.isArray(values.fromAirport) ? values.fromAirport : [values.fromAirport];
     const toAirports = Array.isArray(values.toAirport) ? values.toAirport : [values.toAirport];
-
+    
     // Allow "ANYWHERE" as a valid destination to support "Explore everywhere"
     const isExploreEverywhere = toAirports.includes("ANYWHERE");
-
+    
     const searchParams: FlightSearchParams = {
       fromAirport: fromAirports.map(airport => airport.toUpperCase()),
       toAirport: isExploreEverywhere ? "ANYWHERE" : toAirports.map(airport => airport.toUpperCase()),

@@ -1,63 +1,9 @@
+
 import { useState, useRef, useEffect } from "react";
 import { MapPin, X, Plus, Check } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-
-// Function to get location images from Unsplash
-const getLocationImage = (destination: any) => {
-  const imageMap: { [key: string]: string } = {
-    // Major cities
-    'CDG': 'https://images.unsplash.com/photo-1549144511-f099e773c147', // Paris
-    'ORY': 'https://images.unsplash.com/photo-1549144511-f099e773c147', // Paris
-    'LHR': 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad', // London
-    'LGW': 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad', // London
-    'FCO': 'https://images.unsplash.com/photo-1552832230-c0197040cd5b', // Rome
-    'CIA': 'https://images.unsplash.com/photo-1552832230-c0197040cd5b', // Rome
-    'VCE': 'https://images.unsplash.com/photo-1523906834658-6e24ef2386f9', // Venice
-    'TSF': 'https://images.unsplash.com/photo-1523906834658-6e24ef2386f9', // Venice/Treviso
-    'MXP': 'https://images.unsplash.com/photo-1543297057-25c5d4e1e5b1', // Milan
-    'LIN': 'https://images.unsplash.com/photo-1543297057-25c5d4e1e5b1', // Milan
-    'BGY': 'https://images.unsplash.com/photo-1543297057-25c5d4e1e5b1', // Milan/Bergamo
-    'MAD': 'https://images.unsplash.com/photo-1539037116277-4db20889f2d4', // Madrid
-    'BCN': 'https://images.unsplash.com/photo-1579282240050-352db0a14c21', // Barcelona
-    'AMS': 'https://images.unsplash.com/photo-1534351590666-13e3e96b5017', // Amsterdam
-    'FRA': 'https://images.unsplash.com/photo-1467269204594-9661b134dd2b', // Frankfurt
-    'MUC': 'https://images.unsplash.com/photo-1595867818082-083862f3d630', // Munich
-    'ZUR': 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4', // Zurich
-    'VIE': 'https://images.unsplash.com/photo-1516550893923-42d28e5677af', // Vienna
-    'BRU': 'https://images.unsplash.com/photo-1559113202-c916b8e44373', // Brussels
-    'CPH': 'https://images.unsplash.com/photo-1513622790541-eaa84d356909', // Copenhagen
-    'ARN': 'https://images.unsplash.com/photo-1509356843151-3e7d96241e11', // Stockholm
-    'OSL': 'https://images.unsplash.com/photo-1578662996442-48f60103fc96', // Oslo
-    'DUB': 'https://images.unsplash.com/photo-1590089415225-401ed6f9db8e', // Dublin
-    'LIS': 'https://images.unsplash.com/photo-1555881400-74d7acaacd8b', // Lisbon
-    'ATH': 'https://images.unsplash.com/photo-1555993539-1732b0258235', // Athens
-    'IST': 'https://images.unsplash.com/photo-1524231757912-21f4fe3a7200', // Istanbul
-    'DXB': 'https://images.unsplash.com/photo-1512632578888-169bbbc64f33', // Dubai
-    'JFK': 'https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9', // New York
-    'LAX': 'https://images.unsplash.com/photo-1520637836862-4d197d17c90a', // Los Angeles
-    'NRT': 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf', // Tokyo
-    'HKG': 'https://images.unsplash.com/photo-1536599018102-9f803c140fc1', // Hong Kong
-    'NAP': 'https://images.unsplash.com/photo-1600298881974-6be191ceeda1', // Naples
-    'CTA': 'https://images.unsplash.com/photo-1533105079780-92b9be482077', // Catania
-    'PMO': 'https://images.unsplash.com/photo-1555952494-efd681c7e3f9', // Palermo
-    // Countries - use representative images
-    'anywhere:country:france': 'https://images.unsplash.com/photo-1549144511-f099e773c147',
-    'anywhere:country:united kingdom': 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad',
-    'anywhere:country:italy': 'https://images.unsplash.com/photo-1552832230-c0197040cd5b',
-    'anywhere:country:spain': 'https://images.unsplash.com/photo-1539037116277-4db20889f2d4',
-    'anywhere:country:germany': 'https://images.unsplash.com/photo-1467269204594-9661b134dd2b',
-    'anywhere:country:netherlands': 'https://images.unsplash.com/photo-1534351590666-13e3e96b5017',
-    // Regions
-    'anywhere:region:europe': 'https://images.unsplash.com/photo-1467269204594-9661b134dd2b',
-    'anywhere:region:asia': 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf',
-    'anywhere:region:america': 'https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9',
-    'ANYWHERE': 'https://images.unsplash.com/photo-1488646953014-85cb44e25828', // Generic travel
-  };
-
-  return imageMap[destination.code] || 'https://images.unsplash.com/photo-1488646953014-85cb44e25828';
-};
 
 interface DepartureSelectorProps {
   value?: string | string[];
@@ -94,7 +40,7 @@ export default function DepartureSelector({
     { code: "NAP", name: "Naples", city: "Naples", country: "Italy", type: "airport" },
     { code: "CTA", name: "Catania", city: "Catania", country: "Italy", type: "airport" },
     { code: "PMO", name: "Palermo", city: "Palermo", country: "Italy", type: "airport" },
-
+    
     // Major European destinations
     { code: "CDG", name: "Paris Charles de Gaulle", city: "Paris", country: "France", type: "airport" },
     { code: "ORY", name: "Paris Orly", city: "Paris", country: "France", type: "airport" },
@@ -121,7 +67,7 @@ export default function DepartureSelector({
     { code: "PRG", name: "Prague", city: "Prague", country: "Czech Republic", type: "airport" },
     { code: "WAW", name: "Warsaw", city: "Warsaw", country: "Poland", type: "airport" },
     { code: "KRK", name: "Krakow", city: "Krakow", country: "Poland", type: "airport" },
-
+    
     // Global cities with airports
     { code: "TUN", name: "Tunis", city: "Tunis", country: "Tunisia", type: "airport" },
     { code: "PEK", name: "Beijing", city: "Beijing", country: "China", type: "airport" },
@@ -161,7 +107,7 @@ export default function DepartureSelector({
     { code: "TAS", name: "Tashkent", city: "Tashkent", country: "Uzbekistan", type: "airport" },
     { code: "ALA", name: "Almaty", city: "Almaty", country: "Kazakhstan", type: "airport" },
     { code: "SVO", name: "Moscow", city: "Moscow", country: "Russia", type: "airport" },
-
+    
     // Countries
     { code: "IT", name: "Italy", city: "", country: "Italy", type: "country" },
     { code: "FR", name: "France", city: "", country: "France", type: "country" },
@@ -204,7 +150,7 @@ export default function DepartureSelector({
     { code: "UZ", name: "Uzbekistan", city: "", country: "Uzbekistan", type: "country" },
     { code: "KZ", name: "Kazakhstan", city: "", country: "Kazakhstan", type: "country" },
     { code: "RU", name: "Russia", city: "", country: "Russia", type: "country" },
-
+    
     // Regions
     { code: "EUROPE", name: "Europe", city: "", country: "", type: "region" },
     { code: "ASIA", name: "Asia", city: "", country: "", type: "region" },
@@ -247,12 +193,12 @@ export default function DepartureSelector({
       setSelectedValues([]);
     }
   }, [value]);
-
+  
   // Filter destinations based on search term and exclude already selected
   const filteredDestinations = allDestinations.filter(dest => {
     if (!searchTerm) return false;
     if (selectedValues.some(selected => selected.code === dest.code)) return false;
-
+    
     const search = searchTerm.toLowerCase();
     return (
       dest.name.toLowerCase().includes(search) ||
@@ -267,11 +213,11 @@ export default function DepartureSelector({
     const typePriority = { region: 1, country: 2, airport: 3 };
     const aPriority = typePriority[a.type as keyof typeof typePriority] || 4;
     const bPriority = typePriority[b.type as keyof typeof typePriority] || 4;
-
+    
     if (aPriority !== bPriority) {
       return aPriority - bPriority;
     }
-
+    
     // If same type, sort alphabetically
     return a.name.localeCompare(b.name);
   });
@@ -294,15 +240,15 @@ export default function DepartureSelector({
       const newSelectedValues = [...selectedValues, destination];
       setSelectedValues(newSelectedValues);
       onChange(newSelectedValues.map(d => d.code));
-
+      
       // Track recently added for UI feedback
       setRecentlyAdded(prev => [...prev, destination.code]);
-
+      
       // Remove from recently added after 2 seconds
       setTimeout(() => {
         setRecentlyAdded(prev => prev.filter(code => code !== destination.code));
       }, 2000);
-
+      
       // Auto-scroll to show the latest destination
       setTimeout(() => {
         const container = inputRef.current?.parentElement?.querySelector('.scrollbar-hide');
@@ -310,7 +256,7 @@ export default function DepartureSelector({
           container.scrollTo({ left: container.scrollWidth, behavior: 'smooth' });
         }
       }, 100);
-
+      
       // Clear search term when destination is added
       setSearchTerm("");
     } else {
@@ -324,7 +270,7 @@ export default function DepartureSelector({
   const handleDestinationRemove = (codeToRemove: string) => {
     const newSelectedValues = selectedValues.filter(dest => dest.code !== codeToRemove);
     setSelectedValues(newSelectedValues);
-
+    
     if (multiSelect) {
       onChange(newSelectedValues.map(d => d.code));
     } else {
@@ -392,7 +338,7 @@ export default function DepartureSelector({
           showResults && "border-blue-500 shadow-md ring-1 ring-blue-500 ring-opacity-20"
         )}>
           <MapPin className="h-4 w-4 text-gray-500 mr-2 flex-shrink-0" />
-
+          
           {/* Selected destinations and input container */}
           <div className="flex-1 flex items-center min-w-0">
             {/* Selected destinations scrollable container */}
@@ -433,7 +379,7 @@ export default function DepartureSelector({
               )}
             />
           </div>
-
+          
           {(selectedValues.length > 0 || searchTerm) && (
             <button
               onClick={handleClear}
@@ -485,63 +431,50 @@ export default function DepartureSelector({
           {searchResults.map((destination) => (
             <div
               key={destination.code}
-              className="w-full text-left border-b border-gray-100 last:border-b-0 hover:bg-gray-50"
+              className="w-full text-left p-3 hover:bg-gray-50 flex items-center justify-between border-b border-gray-100 last:border-b-0"
             >
-              <div className="flex items-center p-3">
-                {/* Location Image */}
-                <div className="w-12 h-12 rounded-lg overflow-hidden mr-3 flex-shrink-0">
-                  <img
-                    src={getLocationImage(destination)}
-                    alt={destination.name}
-                    className="w-full h-full object-cover"
-                    loading="lazy"
-                  />
+              <button
+                onClick={() => {
+                  if (!multiSelect) {
+                    setSelectedValues([destination]);
+                    onChange(destination.code);
+                    setShowResults(false);
+                    setSearchTerm("");
+                  } else {
+                    handleDestinationAdd(destination);
+                  }
+                }}
+                className="flex-1 text-left"
+              >
+                <div className="font-medium">{destination.name}</div>
+                <div className="text-sm text-gray-500">
+                  {destination.type === "airport" && destination.city && `${destination.city}, `}
+                  {destination.country}
+                  {destination.type === "region" && " • Region"}
+                  {destination.type === "country" && " • Country"}
                 </div>
-
-                <button
-                  onClick={() => {
-                    if (!multiSelect) {
-                      setSelectedValues([destination]);
-                      onChange(destination.code);
-                      setShowResults(false);
-                      setSearchTerm("");
-                    } else {
-                      handleDestinationAdd(destination);
-                    }
-                  }}
-                  className="flex-1 text-left"
-                >
-                  <div className="font-medium">{destination.name}</div>
-                  <div className="text-sm text-gray-500">
-                    {destination.city && destination.city !== destination.name && `${destination.city}, `}
-                    {destination.country}
-                    {destination.type === "region" && " • Region"}
-                    {destination.type === "country" && " • Country"}
-                  </div>
-                </button>
-
-                <div className="flex items-center space-x-2">
-                  <div className="text-sm font-mono text-gray-400">
-                    {destination.type === "airport" ? destination.code : ""}
-                  </div>
-                  {multiSelect && (
-                    <button
-                      onClick={() => handleDestinationAdd(destination)}
-                      className={cn(
-                        "w-6 h-6 text-white rounded flex items-center justify-center transition-colors",
-                        recentlyAdded.includes(destination.code)
-                          ? "bg-green-600 hover:bg-green-700"
-                          : "bg-blue-600 hover:bg-blue-700"
-                      )}
-                    >
-                      {recentlyAdded.includes(destination.code) ? (
-                        <Check className="h-4 w-4" />
-                      ) : (
-                        <Plus className="h-4 w-4" />
-                      )}
-                    </button>
-                  )}
+              </button>
+              <div className="flex items-center gap-2">
+                <div className="text-sm font-mono text-gray-400">
+                  {destination.type === "airport" ? destination.code : ""}
                 </div>
+                {multiSelect && (
+                  <button
+                    onClick={() => handleDestinationAdd(destination)}
+                    className={cn(
+                      "w-6 h-6 text-white rounded flex items-center justify-center transition-colors",
+                      recentlyAdded.includes(destination.code)
+                        ? "bg-green-600 hover:bg-green-700"
+                        : "bg-blue-600 hover:bg-blue-700"
+                    )}
+                  >
+                    {recentlyAdded.includes(destination.code) ? (
+                      <Check className="h-4 w-4" />
+                    ) : (
+                      <Plus className="h-4 w-4" />
+                    )}
+                  </button>
+                )}
               </div>
             </div>
           ))}
