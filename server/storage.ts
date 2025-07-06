@@ -127,6 +127,9 @@ export class MemStorage implements IStorage {
     const search: FlightSearch = {
       ...insertSearch,
       id,
+      returnDate: insertSearch.returnDate || null,
+      passengers: insertSearch.passengers || 1,
+      filters: insertSearch.filters as any || null,
       createdAt: new Date(),
     };
     this.flightSearches.set(id, search);
@@ -142,6 +145,10 @@ export class MemStorage implements IStorage {
     const result: FlightResult = {
       ...insertResult,
       id,
+      searchId: insertResult.searchId || null,
+      stops: insertResult.stops || 0,
+      layoverDuration: insertResult.layoverDuration || null,
+      amenities: insertResult.amenities as string[] || null,
     };
     this.flightResults.set(id, result);
     return result;
@@ -228,6 +235,9 @@ export class MemStorage implements IStorage {
     const search: RecentSearch = {
       ...insertSearch,
       id,
+      returnDate: insertSearch.returnDate || null,
+      bestPrice: insertSearch.bestPrice || null,
+      searchCount: insertSearch.searchCount || 1,
       lastSearched: new Date(),
     };
     this.recentSearches.set(id, search);
@@ -259,6 +269,8 @@ export class MemStorage implements IStorage {
     const deal: FlightDeal = {
       ...insertDeal,
       id,
+      imageUrl: insertDeal.imageUrl || null,
+      isActive: insertDeal.isActive !== undefined ? insertDeal.isActive : true,
     };
     this.flightDeals.set(id, deal);
     return deal;

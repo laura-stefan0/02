@@ -9,8 +9,6 @@ import { Label } from "@/components/ui/label";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useFlightSearch } from "@/hooks/use-flight-search";
@@ -25,12 +23,13 @@ const formSchema = z.object({
   filters: z.object({
     priceRange: z.array(z.number()).length(2).optional(),
     departureTime: z.array(z.string()).optional(),
-    stops: z.enum(["direct", "1-stop", "2plus-stops"]).optional(),
-    airlines: z.array(z.string()).optional(),
-    maxDuration: z.number().optional(),
-    layoverDuration: z.enum(["short", "long"]).optional(),
+    stops: z.array(z.string()).optional(),
+    maxDuration: z.array(z.number()).length(2).optional(),
+    layoverDuration: z.array(z.string()).optional(),
   }).optional(),
 });
+
+type FormData = z.infer<typeof formSchema>;
 
 interface FlightSearchFormProps {
   onSearchComplete?: (results: any) => void;
@@ -40,7 +39,7 @@ export default function FlightSearchForm({ onSearchComplete }: FlightSearchFormP
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const { searchFlights, isLoading, results, error } = useFlightSearch();
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       fromAirport: "",
@@ -51,19 +50,27 @@ export default function FlightSearchForm({ onSearchComplete }: FlightSearchFormP
       filters: {
         priceRange: [0, 2000],
         departureTime: [],
-        maxDuration: 24,
+        maxDuration: [0, 24],
+        stops: [],
+        layoverDuration: [],
       },
     },
   });
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
+  const onSubmit = (values: FormData) => {
     const searchParams: FlightSearchParams = {
       fromAirport: values.fromAirport.toUpperCase(),
       toAirport: values.toAirport.toUpperCase(),
       departureDate: values.departureDate,
       returnDate: values.returnDate || undefined,
       passengers: values.passengers,
-      filters: values.filters,
+      filters: {
+        priceRange: values.filters?.priceRange as [number, number] | undefined,
+        departureTime: values.filters?.departureTime,
+        stops: values.filters?.stops,
+        maxDuration: values.filters?.maxDuration as [number, number] | undefined,
+        layoverDuration: values.filters?.layoverDuration,
+      },
     };
 
     searchFlights(searchParams, {
@@ -73,10 +80,10 @@ export default function FlightSearchForm({ onSearchComplete }: FlightSearchFormP
     });
   };
 
-  const setAnytime = () => {
+  const setAnytime = (field: "departureDate" | "returnDate") => {
     const today = new Date();
     const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, today.getDate());
-    form.setValue("departureDate", nextMonth.toISOString().split('T')[0]);
+    form.setValue(field, nextMonth.toISOString().split('T')[0]);
   };
 
   const setAnywhere = () => {
@@ -143,10 +150,19 @@ export default function FlightSearchForm({ onSearchComplete }: FlightSearchFormP
                             <div className="relative">
                               <PlaneLanding className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                               <Input 
-                                placeholder="Anywhere" 
-                                className="pl-10" 
+                                placeholder="Destination or Anywhere" 
+                                className="pl-10 pr-20" 
                                 {...field} 
                               />
+                              <Button 
+                                type="button" 
+                                variant="ghost" 
+                                size="sm" 
+                                onClick={setAnywhere}
+                                className="absolute right-1 top-1/2 transform -translate-y-1/2 text-xs text-brand-blue hover:text-brand-blue-dark h-6 px-2"
+                              >
+                                Anywhere
+                              </Button>
                             </div>
                           </FormControl>
                           <FormMessage />
@@ -165,9 +181,18 @@ export default function FlightSearchForm({ onSearchComplete }: FlightSearchFormP
                               <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                               <Input 
                                 type="date" 
-                                className="pl-10" 
+                                className="pl-10 pr-20" 
                                 {...field} 
                               />
+                              <Button 
+                                type="button" 
+                                variant="ghost" 
+                                size="sm" 
+                                onClick={() => setAnytime("departureDate")}
+                                className="absolute right-1 top-1/2 transform -translate-y-1/2 text-xs text-brand-blue hover:text-brand-blue-dark h-6 px-2"
+                              >
+                                Anytime
+                              </Button>
                             </div>
                           </FormControl>
                           <FormMessage />
@@ -186,9 +211,18 @@ export default function FlightSearchForm({ onSearchComplete }: FlightSearchFormP
                               <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                               <Input 
                                 type="date" 
-                                className="pl-10" 
+                                className="pl-10 pr-20" 
                                 {...field} 
                               />
+                              <Button 
+                                type="button" 
+                                variant="ghost" 
+                                size="sm" 
+                                onClick={() => setAnytime("returnDate")}
+                                className="absolute right-1 top-1/2 transform -translate-y-1/2 text-xs text-brand-blue hover:text-brand-blue-dark h-6 px-2"
+                              >
+                                Anytime
+                              </Button>
                             </div>
                           </FormControl>
                           <FormMessage />
@@ -197,31 +231,8 @@ export default function FlightSearchForm({ onSearchComplete }: FlightSearchFormP
                     />
                   </div>
 
-                  {/* Search Options */}
-                  <div className="flex flex-wrap items-center justify-between">
-                    <div className="flex flex-wrap gap-3 mb-4 lg:mb-0">
-                      <Button 
-                        type="button" 
-                        variant="outline" 
-                        size="sm" 
-                        onClick={setAnytime}
-                        className="text-brand-blue border-brand-blue hover:bg-blue-50"
-                      >
-                        <CalendarDays className="h-4 w-4 mr-2" />
-                        Anytime
-                      </Button>
-                      <Button 
-                        type="button" 
-                        variant="outline" 
-                        size="sm" 
-                        onClick={setAnywhere}
-                        className="text-brand-blue border-brand-blue hover:bg-blue-50"
-                      >
-                        <Globe className="h-4 w-4 mr-2" />
-                        Anywhere
-                      </Button>
-                    </div>
-                    
+                  {/* Advanced Filters Toggle */}
+                  <div className="flex justify-end">
                     <Collapsible open={showAdvancedFilters} onOpenChange={setShowAdvancedFilters}>
                       <CollapsibleTrigger asChild>
                         <Button type="button" variant="ghost" className="text-brand-blue">
@@ -248,18 +259,32 @@ export default function FlightSearchForm({ onSearchComplete }: FlightSearchFormP
                                 <FormItem>
                                   <FormLabel>Price Range</FormLabel>
                                   <FormControl>
-                                    <div className="px-3">
-                                      <Slider
-                                        min={0}
-                                        max={2000}
-                                        step={50}
-                                        value={field.value || [0, 2000]}
-                                        onValueChange={field.onChange}
-                                        className="w-full"
-                                      />
-                                      <div className="flex justify-between text-sm text-gray-500 mt-1">
-                                        <span>€{field.value?.[0] || 0}</span>
-                                        <span>€{field.value?.[1] || 2000}+</span>
+                                    <div className="space-y-3">
+                                      <div className="grid grid-cols-2 gap-2">
+                                        <div>
+                                          <Label className="text-sm text-gray-500">Min Price (€)</Label>
+                                          <Input
+                                            type="number"
+                                            placeholder="0"
+                                            value={field.value?.[0] || 0}
+                                            onChange={(e) => {
+                                              const newValue = [parseInt(e.target.value) || 0, field.value?.[1] || 2000];
+                                              field.onChange(newValue);
+                                            }}
+                                          />
+                                        </div>
+                                        <div>
+                                          <Label className="text-sm text-gray-500">Max Price (€)</Label>
+                                          <Input
+                                            type="number"
+                                            placeholder="2000"
+                                            value={field.value?.[1] || 2000}
+                                            onChange={(e) => {
+                                              const newValue = [field.value?.[0] || 0, parseInt(e.target.value) || 2000];
+                                              field.onChange(newValue);
+                                            }}
+                                          />
+                                        </div>
                                       </div>
                                     </div>
                                   </FormControl>
@@ -293,7 +318,7 @@ export default function FlightSearchForm({ onSearchComplete }: FlightSearchFormP
                                               }
                                             }}
                                           />
-                                          <label className="text-sm text-gray-700">{time.label}</label>
+                                          <Label className="text-sm text-gray-700">{time.label}</Label>
                                         </div>
                                       ))}
                                     </div>
@@ -310,47 +335,28 @@ export default function FlightSearchForm({ onSearchComplete }: FlightSearchFormP
                                 <FormItem>
                                   <FormLabel>Stops</FormLabel>
                                   <FormControl>
-                                    <RadioGroup 
-                                      value={field.value} 
-                                      onValueChange={field.onChange}
-                                    >
-                                      <div className="flex items-center space-x-2">
-                                        <RadioGroupItem value="direct" id="direct" />
-                                        <Label htmlFor="direct">Direct</Label>
-                                      </div>
-                                      <div className="flex items-center space-x-2">
-                                        <RadioGroupItem value="1-stop" id="1-stop" />
-                                        <Label htmlFor="1-stop">1 Stop</Label>
-                                      </div>
-                                      <div className="flex items-center space-x-2">
-                                        <RadioGroupItem value="2plus-stops" id="2plus-stops" />
-                                        <Label htmlFor="2plus-stops">2+ Stops</Label>
-                                      </div>
-                                    </RadioGroup>
-                                  </FormControl>
-                                </FormItem>
-                              )}
-                            />
-
-                            {/* Airlines */}
-                            <FormField
-                              control={form.control}
-                              name="filters.airlines"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Preferred Airlines</FormLabel>
-                                  <FormControl>
-                                    <Select>
-                                      <SelectTrigger>
-                                        <SelectValue placeholder="Select airlines" />
-                                      </SelectTrigger>
-                                      <SelectContent>
-                                        <SelectItem value="lufthansa">Lufthansa</SelectItem>
-                                        <SelectItem value="emirates">Emirates</SelectItem>
-                                        <SelectItem value="british-airways">British Airways</SelectItem>
-                                        <SelectItem value="air-france">Air France</SelectItem>
-                                      </SelectContent>
-                                    </Select>
+                                    <div className="space-y-2">
+                                      {[
+                                        { value: "direct", label: "Direct" },
+                                        { value: "1-stop", label: "1 Stop" },
+                                        { value: "2plus-stops", label: "2+ Stops" },
+                                      ].map((stop) => (
+                                        <div key={stop.value} className="flex items-center space-x-2">
+                                          <Checkbox
+                                            checked={field.value?.includes(stop.value)}
+                                            onCheckedChange={(checked) => {
+                                              const currentValue = field.value || [];
+                                              if (checked) {
+                                                field.onChange([...currentValue, stop.value]);
+                                              } else {
+                                                field.onChange(currentValue.filter(v => v !== stop.value));
+                                              }
+                                            }}
+                                          />
+                                          <Label className="text-sm text-gray-700">{stop.label}</Label>
+                                        </div>
+                                      ))}
+                                    </div>
                                   </FormControl>
                                 </FormItem>
                               )}
@@ -362,20 +368,34 @@ export default function FlightSearchForm({ onSearchComplete }: FlightSearchFormP
                               name="filters.maxDuration"
                               render={({ field }) => (
                                 <FormItem>
-                                  <FormLabel>Max Flight Duration</FormLabel>
+                                  <FormLabel>Flight Duration (hours)</FormLabel>
                                   <FormControl>
-                                    <div className="px-3">
-                                      <Slider
-                                        min={1}
-                                        max={24}
-                                        step={1}
-                                        value={[field.value || 24]}
-                                        onValueChange={(value) => field.onChange(value[0])}
-                                        className="w-full"
-                                      />
-                                      <div className="flex justify-between text-sm text-gray-500 mt-1">
-                                        <span>1h</span>
-                                        <span>{field.value || 24}h+</span>
+                                    <div className="space-y-3">
+                                      <div className="grid grid-cols-2 gap-2">
+                                        <div>
+                                          <Label className="text-sm text-gray-500">Min Duration</Label>
+                                          <Input
+                                            type="number"
+                                            placeholder="0"
+                                            value={field.value?.[0] || 0}
+                                            onChange={(e) => {
+                                              const newValue = [parseInt(e.target.value) || 0, field.value?.[1] || 24];
+                                              field.onChange(newValue);
+                                            }}
+                                          />
+                                        </div>
+                                        <div>
+                                          <Label className="text-sm text-gray-500">Max Duration</Label>
+                                          <Input
+                                            type="number"
+                                            placeholder="24"
+                                            value={field.value?.[1] || 24}
+                                            onChange={(e) => {
+                                              const newValue = [field.value?.[0] || 0, parseInt(e.target.value) || 24];
+                                              field.onChange(newValue);
+                                            }}
+                                          />
+                                        </div>
                                       </div>
                                     </div>
                                   </FormControl>
@@ -392,24 +412,28 @@ export default function FlightSearchForm({ onSearchComplete }: FlightSearchFormP
                                   <FormLabel>Layover Options</FormLabel>
                                   <FormControl>
                                     <div className="space-y-2">
-                                      <div className="flex items-center space-x-2">
-                                        <Checkbox
-                                          checked={field.value === "short"}
-                                          onCheckedChange={(checked) => {
-                                            field.onChange(checked ? "short" : undefined);
-                                          }}
-                                        />
-                                        <label className="text-sm text-gray-700">Short Layover (&lt; 2h)</label>
-                                      </div>
-                                      <div className="flex items-center space-x-2">
-                                        <Checkbox
-                                          checked={field.value === "long"}
-                                          onCheckedChange={(checked) => {
-                                            field.onChange(checked ? "long" : undefined);
-                                          }}
-                                        />
-                                        <label className="text-sm text-gray-700">Long Layover (8h+)</label>
-                                      </div>
+                                      {[
+                                        { value: "none", label: "No layover" },
+                                        { value: "short", label: "Less than 2 hours" },
+                                        { value: "8plus", label: "8+ hours" },
+                                        { value: "24plus", label: "24+ hours" },
+                                        { value: "48plus", label: "48+ hours" },
+                                      ].map((layover) => (
+                                        <div key={layover.value} className="flex items-center space-x-2">
+                                          <Checkbox
+                                            checked={field.value?.includes(layover.value)}
+                                            onCheckedChange={(checked) => {
+                                              const currentValue = field.value || [];
+                                              if (checked) {
+                                                field.onChange([...currentValue, layover.value]);
+                                              } else {
+                                                field.onChange(currentValue.filter(v => v !== layover.value));
+                                              }
+                                            }}
+                                          />
+                                          <Label className="text-sm text-gray-700">{layover.label}</Label>
+                                        </div>
+                                      ))}
                                     </div>
                                   </FormControl>
                                 </FormItem>

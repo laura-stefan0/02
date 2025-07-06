@@ -13,10 +13,9 @@ export const flightSearches = pgTable("flight_searches", {
   filters: jsonb("filters").$type<{
     priceRange?: [number, number];
     departureTime?: string[];
-    stops?: "direct" | "1-stop" | "2plus-stops";
-    airlines?: string[];
-    maxDuration?: number;
-    layoverDuration?: "short" | "long";
+    stops?: string[];
+    maxDuration?: [number, number];
+    layoverDuration?: string[];
     aircraftType?: string[];
   }>(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
