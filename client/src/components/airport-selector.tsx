@@ -13,9 +13,10 @@ interface AirportSelectorProps {
   onAirportChange: (airport: { code: string; name: string; city: string; country: string }) => void;
   title: string;
   subtitle: string;
+  onBack?: () => void;
 }
 
-export default function AirportSelector({ selectedAirport, onAirportChange, title, subtitle }: AirportSelectorProps) {
+export default function AirportSelector({ selectedAirport, onAirportChange, title, subtitle, onBack }: AirportSelectorProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [nearestAirport, setNearestAirport] = useState<GeolocationResult | null>(null);
   const [showManualSelection, setShowManualSelection] = useState(false);
