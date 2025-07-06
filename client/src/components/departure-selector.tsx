@@ -1,23 +1,22 @@
 
 import { useState, useRef, useEffect } from "react";
-import { MapPin, Globe, X, Info } from "lucide-react";
+import { MapPin, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 
-interface DestinationSelectorProps {
+interface DepartureSelectorProps {
   value?: string;
   onChange: (value: string) => void;
   placeholder?: string;
   label?: string;
 }
 
-export default function DestinationSelector({ 
+export default function DepartureSelector({ 
   value, 
   onChange, 
-  placeholder = "Add destination",
-  label = "To"
-}: DestinationSelectorProps) {
+  placeholder = "Add departure",
+  label = "From"
+}: DepartureSelectorProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [showResults, setShowResults] = useState(false);
   const [selectedValue, setSelectedValue] = useState("");
@@ -170,15 +169,6 @@ export default function DestinationSelector({
     { code: "SCANDINAVIA", name: "Scandinavia", city: "", country: "", type: "region" },
     { code: "BALKANS", name: "Balkans", city: "", country: "", type: "region" },
   ];
-
-  // European regions for "anywhere" mode
-  const regions = [
-    { code: "europe", name: "Europe" },
-    { code: "mediterranean", name: "Mediterranean" },
-    { code: "northern-europe", name: "Northern Europe" },
-    { code: "western-europe", name: "Western Europe" },
-    { code: "eastern-europe", name: "Eastern Europe" },
-  ];
   
   // Filter destinations based on search term
   const filteredDestinations = allDestinations.filter(dest => {
@@ -193,26 +183,9 @@ export default function DestinationSelector({
     );
   });
 
-  // Add "Anywhere" options when searching
-  const anywhereOptions = searchTerm ? [
-    { code: "anywhere:europe", name: "Europe", city: "", country: "", type: "anywhere" },
-  ].filter(option => option.name.toLowerCase().includes(searchTerm.toLowerCase())) : [];
-
-  // Popular destinations to show when no search term
-  const popularDestinations = [
-    { code: "CDG", name: "Paris Charles de Gaulle", city: "Paris", country: "France", type: "airport" },
-    { code: "LHR", name: "London Heathrow", city: "London", country: "United Kingdom", type: "airport" },
-    { code: "BCN", name: "Barcelona", city: "Barcelona", country: "Spain", type: "airport" },
-    { code: "AMS", name: "Amsterdam", city: "Amsterdam", country: "Netherlands", type: "airport" },
-    { code: "BER", name: "Berlin Brandenburg", city: "Berlin", country: "Germany", type: "airport" },
-    { code: "FCO", name: "Rome Fiumicino", city: "Rome", country: "Italy", type: "airport" },
-    { code: "EUROPE", name: "Europe", city: "", country: "", type: "region" },
-    { code: "ASIA", name: "Asia", city: "", country: "", type: "region" },
-  ];
-
   // Sort filtered destinations by priority: regions, countries, cities, then airports
   const sortedDestinations = filteredDestinations.sort((a, b) => {
-    const typePriority = { region: 1, country: 2, airport: 3, anywhere: 0 };
+    const typePriority = { region: 1, country: 2, airport: 3 };
     const aPriority = typePriority[a.type as keyof typeof typePriority] || 4;
     const bPriority = typePriority[b.type as keyof typeof typePriority] || 4;
     
@@ -224,11 +197,7 @@ export default function DestinationSelector({
     return a.name.localeCompare(b.name);
   });
 
-  // Show popular destinations when no search term, otherwise show search results
-  const searchResults = searchTerm ? [...anywhereOptions, ...sortedDestinations] : popularDestinations;
-  const allResults = searchResults;
-
-  const handleDestinationSelect = (destination: { code: string; name: string }) => {
+  const handleDestinationSelect = (destination: { code: string; name: string; type: string; city?: string }) => {
     const displayValue = destination.type === "airport" 
       ? `${destination.city || destination.name} (${destination.code})`
       : destination.name;
@@ -251,8 +220,8 @@ export default function DestinationSelector({
   };
 
   const handleInputClick = () => {
-    // Only show "Explore everywhere" when clicking and no search term
-    setShowResults(searchTerm.length === 0);
+    // Don't show anything on initial click for departure field
+    setShowResults(false);
   };
 
   const handleClear = () => {
@@ -268,12 +237,6 @@ export default function DestinationSelector({
     if (searchTerm) return searchTerm;
     
     if (value) {
-      if (value.startsWith("anywhere:")) {
-        const regionCode = value.split(":")[1];
-        const region = regions.find(r => r.code === regionCode);
-        return region ? region.name : "Anywhere";
-      }
-      
       const destination = allDestinations.find(d => d.code === value);
       if (destination) {
         if (destination.type === "airport") {
@@ -327,55 +290,13 @@ export default function DestinationSelector({
         )}
       </div>
 
-      {/* Results dropdown */}
-      {showResults && (
+      {/* Results dropdown - only show when typing */}
+      {showResults && searchTerm && (
         <div 
           ref={resultsRef}
           className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-64 overflow-y-auto"
         >
-          {/* Show "Explore everywhere" only when no search term (initial click) */}
-          {!searchTerm && (
-            <div className="p-3 border-b border-gray-200 bg-blue-50">
-              <Popover>
-                <PopoverTrigger asChild>
-                  <button className="flex items-center gap-2 text-blue-600 hover:text-blue-700 text-sm font-medium">
-                    <Globe className="h-4 w-4" />
-                    Explore everywhere
-                    <Info className="h-4 w-4" />
-                  </button>
-                </PopoverTrigger>
-                <PopoverContent className="w-80" align="start">
-                  <div className="space-y-3">
-                    <h4 className="font-semibold text-gray-900">Find destinations worldwide</h4>
-                    <p className="text-sm text-gray-600">
-                      Search for cities, airports, countries, or regions. You can also select "Anywhere" options to discover flights to any destination within Europe or worldwide.
-                    </p>
-                    <div className="grid grid-cols-2 gap-2 text-xs">
-                      <div className="flex items-center gap-1">
-                        <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                        <span>Regions</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                        <span>Countries</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-                        <span>Cities</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <div className="w-2 h-2 bg-gray-500 rounded-full"></div>
-                        <span>Airports</span>
-                      </div>
-                    </div>
-                  </div>
-                </PopoverContent>
-              </Popover>
-            </div>
-          )}
-
-          {/* Show search results only when typing */}
-          {searchTerm && allResults.map((destination) => (
+          {sortedDestinations.map((destination) => (
             <button
               key={destination.code}
               onClick={() => handleDestinationSelect(destination)}
@@ -388,12 +309,10 @@ export default function DestinationSelector({
                   {destination.country}
                   {destination.type === "region" && " • Region"}
                   {destination.type === "country" && " • Country"}
-                  {destination.type === "anywhere" && " • Anywhere"}
                 </div>
               </div>
               <div className="text-sm font-mono text-gray-400">
-                {destination.type === "airport" ? destination.code : 
-                 destination.type === "anywhere" ? <Globe className="h-4 w-4" /> : ""}
+                {destination.type === "airport" ? destination.code : ""}
               </div>
             </button>
           ))}

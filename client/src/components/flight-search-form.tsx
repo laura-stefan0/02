@@ -16,6 +16,7 @@ import { useFlightSearch } from "@/hooks/use-flight-search";
 import type { FlightSearchParams } from "@/lib/types";
 import DepartureDateSelector from "./departure-date-selector";
 import DestinationSelector from "./destination-selector";
+import DepartureSelector from "./departure-selector";
 
 const formSchema = z.object({
   fromAirport: z.string().min(3, "Please enter departure airport"),
@@ -96,7 +97,7 @@ export default function FlightSearchForm({ onSearchComplete }: FlightSearchFormP
           backgroundPosition: "center",
         }}
       />
-      
+
       <div className="relative py-12 lg:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -121,10 +122,10 @@ export default function FlightSearchForm({ onSearchComplete }: FlightSearchFormP
                         <FormItem>
                           <FormLabel>From</FormLabel>
                           <FormControl>
-                            <DestinationSelector
+                            <DepartureSelector
                               value={field.value}
                               onChange={field.onChange}
-                              placeholder="Venice (VCE)"
+                              placeholder="Add departure"
                               label="From"
                             />
                           </FormControl>
@@ -207,7 +208,7 @@ export default function FlightSearchForm({ onSearchComplete }: FlightSearchFormP
                       <Card className="bg-gray-50">
                         <CardContent className="p-6">
                           <h3 className="text-lg font-semibold text-gray-900 mb-4">Advanced Filters</h3>
-                          
+
                           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {/* Price Range */}
                             <FormField
