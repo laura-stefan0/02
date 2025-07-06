@@ -2,7 +2,6 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertFlightSearchSchema } from "@shared/schema";
-import { amadeusService } from "./lib/amadeus";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Flight search - Amadeus API only
@@ -20,25 +19,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Create search record
       const search = await storage.createFlightSearch(normalizedSearchData);
 
-      // Handle "ANYWHERE" destination
-      if (searchData.toAirport === "ANYWHERE") {
-        return res.status(400).json({ 
-          message: "ANYWHERE destination is not supported with Amadeus API. Please select a specific destination." 
-        });
-      }
-
-      // Use Amadeus API for real flight search
+      // Generate mock flight results
       const fromAirport = Array.isArray(searchData.fromAirport) ? searchData.fromAirport[0] : searchData.fromAirport;
       const toAirport = Array.isArray(searchData.toAirport) ? searchData.toAirport[0] : searchData.toAirport;
 
-      const results = await amadeusService.searchFlights({
-        originLocationCode: fromAirport.toUpperCase(),
-        destinationLocationCode: toAirport.toUpperCase(),
-        departureDate: searchData.departureDate,
-        returnDate: searchData.returnDate || undefined,
-        adults: searchData.passengers,
-        max: 20
-      });
+      const results = generateMockFlightResults(fromAirport, toAirport, searchData.departureDate, searchData.returnDate);
 
       // Add to recent searches
       await storage.addRecentSearch({
@@ -63,7 +48,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Airport search using Amadeus
+  // Airport search using mock data
   app.get("/api/airports/search", async (req, res) => {
     try {
       const { q } = req.query;
@@ -71,7 +56,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Search query is required" });
       }
 
-      const suggestions = await amadeusService.getAirportSuggestions(q);
+      const suggestions = getMockAirportSuggestions(q);
       res.json(suggestions);
     } catch (error) {
       console.error("Airport search error:", error);
@@ -113,15 +98,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const newSearch = await storage.createFlightSearch(searchData);
 
-      // Use Amadeus API for search
-      const results = await amadeusService.searchFlights({
-        originLocationCode: search.fromAirport.toUpperCase(),
-        destinationLocationCode: search.toAirport.toUpperCase(),
-        departureDate: search.departureDate,
-        returnDate: search.returnDate || undefined,
-        adults: 1,
-        max: 20
-      });
+      // Generate mock flight results for rerun
+      const results = generateMockFlightResults(search.fromAirport, search.toAirport, search.departureDate, search.returnDate);
 
       // Update recent search count
       await storage.updateRecentSearch(searchId, {
@@ -146,4 +124,89 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   const httpServer = createServer(app);
   return httpServer;
+}
+
+// Mock data generation functions
+function generateMockFlightResults(fromAirport: string, toAirport: string, departureDate: string, returnDate?: string) {
+  const airlines = ['AA', 'BA', 'LH', 'AF', 'KL', 'EK', 'QR', 'TK', 'SQ', 'CX'];
+  const aircraftTypes = ['A320', 'A321', 'A330', 'A350', 'B737', 'B747', 'B777', 'B787', 'E190'];
+  const results = [];
+
+  for (let i = 0; i < Math.min(15, Math.floor(Math.random() * 20) + 5); i++) {
+    const airline = airlines[Math.floor(Math.random() * airlines.length)];
+    const aircraftType = aircraftTypes[Math.floor(Math.random() * aircraftTypes.length)];
+    const flightNumber = `${airline}${Math.floor(Math.random() * 9000) + 1000}`;
+    
+    // Generate random departure and arrival times
+    const depHour = Math.floor(Math.random() * 24);
+    const depMinute = Math.floor(Math.random() * 60);
+    const duration = Math.floor(Math.random() * 10) + 2; // 2-12 hours
+    const arrHour = (depHour + duration) % 24;
+    const arrMinute = depMinute + Math.floor(Math.random() * 60);
+    
+    const stops = Math.floor(Math.random() * 3); // 0-2 stops
+    const price = Math.floor(Math.random() * 1500) + 200; // $200-$1700
+    
+    let layoverAirport = null;
+    let layoverDuration = null;
+    let isLongLayover = false;
+    
+    if (stops > 0) {
+      const layoverAirports = ['FRA', 'AMS', 'CDG', 'LHR', 'DXB', 'DOH', 'IST'];
+      layoverAirport = layoverAirports[Math.floor(Math.random() * layoverAirports.length)];
+      const layoverHours = Math.floor(Math.random() * 12) + 1;
+      const layoverMins = Math.floor(Math.random() * 60);
+      layoverDuration = `${layoverHours}h ${layoverMins}m`;
+      isLongLayover = layoverHours >= 8;
+    }
+    
+    const amenities = [];
+    if (Math.random() > 0.3) amenities.push('In-flight entertainment');
+    if (Math.random() > 0.2) amenities.push('WiFi');
+    if (Math.random() > 0.5) amenities.push('Power outlets');
+    if (Math.random() > 0.4) amenities.push('Refreshments');
+    
+    results.push({
+      id: i + 1,
+      airline,
+      flightNumber,
+      aircraftType,
+      fromAirport: fromAirport.toUpperCase(),
+      toAirport: toAirport.toUpperCase(),
+      departureTime: `${String(depHour).padStart(2, '0')}:${String(depMinute).padStart(2, '0')}`,
+      arrivalTime: `${String(arrHour).padStart(2, '0')}:${String(arrMinute % 60).padStart(2, '0')}`,
+      duration: `${duration}h ${Math.floor(Math.random() * 60)}m`,
+      stops,
+      layoverAirport,
+      layoverDuration,
+      price: price * 100, // Convert to cents
+      currency: 'USD',
+      isLongLayover,
+      amenities
+    });
+  }
+  
+  return results.sort((a, b) => a.price - b.price);
+}
+
+function getMockAirportSuggestions(query: string) {
+  const mockAirports = [
+    { iataCode: 'NYC', name: 'New York', cityName: 'New York', countryName: 'United States' },
+    { iataCode: 'LAX', name: 'Los Angeles International', cityName: 'Los Angeles', countryName: 'United States' },
+    { iataCode: 'LHR', name: 'London Heathrow', cityName: 'London', countryName: 'United Kingdom' },
+    { iataCode: 'CDG', name: 'Charles de Gaulle', cityName: 'Paris', countryName: 'France' },
+    { iataCode: 'FRA', name: 'Frankfurt Airport', cityName: 'Frankfurt', countryName: 'Germany' },
+    { iataCode: 'AMS', name: 'Amsterdam Schiphol', cityName: 'Amsterdam', countryName: 'Netherlands' },
+    { iataCode: 'DXB', name: 'Dubai International', cityName: 'Dubai', countryName: 'UAE' },
+    { iataCode: 'SIN', name: 'Singapore Changi', cityName: 'Singapore', countryName: 'Singapore' },
+    { iataCode: 'NRT', name: 'Tokyo Narita', cityName: 'Tokyo', countryName: 'Japan' },
+    { iataCode: 'HKG', name: 'Hong Kong International', cityName: 'Hong Kong', countryName: 'Hong Kong' }
+  ];
+  
+  const queryLower = query.toLowerCase();
+  return mockAirports.filter(airport => 
+    airport.name.toLowerCase().includes(queryLower) ||
+    airport.cityName.toLowerCase().includes(queryLower) ||
+    airport.iataCode.toLowerCase().includes(queryLower)
+  );
 }
