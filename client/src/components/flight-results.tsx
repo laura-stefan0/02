@@ -23,6 +23,10 @@ interface FlightResultsProps {
 
 export default function FlightResults({ results, isLoading }: FlightResultsProps) {
   const [sortBy, setSortBy] = useState<'best' | 'cheapest' | 'fastest'>('best');
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 800]);
+  const [selectedStops, setSelectedStops] = useState<string[]>([]);
+  const [selectedAirlines, setSelectedAirlines] = useState<string[]>([]);
+  const [selectedDepartureTimes, setSelectedDepartureTimes] = useState<string[]>([]);
   const { toast } = useToast();
 
   // Helper function to convert duration to minutes
@@ -32,6 +36,50 @@ export default function FlightResults({ results, isLoading }: FlightResultsProps
     const hours = parseInt(matches[1]) || 0;
     const minutes = parseInt(matches[2]) || 0;
     return hours * 60 + minutes;
+  };
+
+  // Helper function to get departure time period
+  const getDepartureTimePeriod = (time: string) => {
+    const hour = parseInt(time.split(':')[0]);
+    if (hour >= 0 && hour < 6) return '00-06';
+    if (hour >= 6 && hour < 12) return '06-12';
+    if (hour >= 12 && hour < 18) return '12-18';
+    return '18-24';
+  };
+
+  // Filter flights based on selected filters
+  const filterFlights = (flights: FlightResult[]) => {
+    return flights.filter(flight => {
+      // Price filter
+      const flightPrice = flight.price / 100; // Convert to euros
+      if (flightPrice < priceRange[0] || flightPrice > priceRange[1]) {
+        return false;
+      }
+
+      // Stops filter
+      if (selectedStops.length > 0) {
+        const matchesStops = selectedStops.some(stopFilter => {
+          if (stopFilter === 'direct' && flight.stops === 0) return true;
+          if (stopFilter === '1-stop' && flight.stops === 1) return true;
+          if (stopFilter === '2-stops' && flight.stops >= 2) return true;
+          return false;
+        });
+        if (!matchesStops) return false;
+      }
+
+      // Airlines filter
+      if (selectedAirlines.length > 0) {
+        if (!selectedAirlines.includes(flight.airline)) return false;
+      }
+
+      // Departure time filter
+      if (selectedDepartureTimes.length > 0) {
+        const departureTimePeriod = getDepartureTimePeriod(flight.departureTime);
+        if (!selectedDepartureTimes.includes(departureTimePeriod)) return false;
+      }
+
+      return true;
+    });
   };
 
   // Sorting function
@@ -65,6 +113,13 @@ export default function FlightResults({ results, isLoading }: FlightResultsProps
     setTimeout(() => {
       window.open(`https://www.google.com/flights#flt=${flight.fromAirport}.${flight.toAirport}.${new Date().toISOString().split('T')[0]};c:EUR;e:1;sd:1;t:f`, '_blank');
     }, 1000);
+  };
+
+  const resetFilters = () => {
+    setPriceRange([0, 800]);
+    setSelectedStops([]);
+    setSelectedAirlines([]);
+    setSelectedDepartureTimes([]);
   };
   if (isLoading) {
     return (
@@ -136,7 +191,7 @@ export default function FlightResults({ results, isLoading }: FlightResultsProps
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-xl font-semibold text-gray-900">
-              {results.count} flights • {results.search?.fromAirport} → {results.search?.toAirport}
+              {results ? filterFlights(results.results).length : 0} of {results?.count || 0} flights • {results?.search?.fromAirport} → {results?.search?.toAirport}
             </h3>
           </div>
 
@@ -167,7 +222,7 @@ export default function FlightResults({ results, isLoading }: FlightResultsProps
             <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
               <div className="flex items-center justify-between mb-4">
                 <h4 className="font-semibold text-gray-900">Filters</h4>
-                <Button variant="ghost" size="sm" className="text-brand-blue">
+                <Button variant="ghost" size="sm" className="text-brand-blue" onClick={resetFilters}>
                   Reset
                 </Button>
               </div>
@@ -178,11 +233,12 @@ export default function FlightResults({ results, isLoading }: FlightResultsProps
                   <Label className="text-sm font-medium text-gray-700 mb-3 block">Price Range</Label>
                   <div className="space-y-3">
                     <div className="flex justify-between text-sm text-gray-600">
-                      <span>€0</span>
-                      <span>€800</span>
+                      <span>€{priceRange[0]}</span>
+                      <span>€{priceRange[1]}</span>
                     </div>
                     <Slider
-                      value={[0, 800]}
+                      value={priceRange}
+                      onValueChange={(value) => setPriceRange(value as [number, number])}
                       max={800}
                       min={0}
                       step={25}
@@ -202,7 +258,17 @@ export default function FlightResults({ results, isLoading }: FlightResultsProps
                     ].map((stop) => (
                       <div key={stop.value} className="flex items-center justify-between">
                         <div className="flex items-center space-x-2">
-                          <Checkbox id={stop.value} />
+                          <Checkbox 
+                            id={stop.value}
+                            checked={selectedStops.includes(stop.value)}
+                            onCheckedChange={(checked) => {
+                              if (checked) {
+                                setSelectedStops([...selectedStops, stop.value]);
+                              } else {
+                                setSelectedStops(selectedStops.filter(s => s !== stop.value));
+                              }
+                            }}
+                          />
                           <Label htmlFor={stop.value} className="text-sm text-gray-700">
                             {stop.label}
                           </Label>
@@ -219,7 +285,17 @@ export default function FlightResults({ results, isLoading }: FlightResultsProps
                   <div className="space-y-2">
                     {["Emirates", "KLM", "Lufthansa", "Turkish Airlines"].map((airline) => (
                       <div key={airline} className="flex items-center space-x-2">
-                        <Checkbox id={airline} />
+                        <Checkbox 
+                          id={airline}
+                          checked={selectedAirlines.includes(airline)}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              setSelectedAirlines([...selectedAirlines, airline]);
+                            } else {
+                              setSelectedAirlines(selectedAirlines.filter(a => a !== airline));
+                            }
+                          }}
+                        />
                         <Label htmlFor={airline} className="text-sm text-gray-700">{airline}</Label>
                       </div>
                     ))}
@@ -236,7 +312,21 @@ export default function FlightResults({ results, isLoading }: FlightResultsProps
                       { time: "12-18", label: "Afternoon" },
                       { time: "18-24", label: "Evening" }
                     ].map((slot) => (
-                      <div key={slot.time} className="text-center p-2 border border-gray-200 rounded cursor-pointer hover:bg-gray-50">
+                      <div 
+                        key={slot.time} 
+                        className={`text-center p-2 border rounded cursor-pointer transition-colors ${
+                          selectedDepartureTimes.includes(slot.time)
+                            ? 'border-brand-blue bg-brand-blue/10 text-brand-blue'
+                            : 'border-gray-200 hover:bg-gray-50'
+                        }`}
+                        onClick={() => {
+                          if (selectedDepartureTimes.includes(slot.time)) {
+                            setSelectedDepartureTimes(selectedDepartureTimes.filter(t => t !== slot.time));
+                          } else {
+                            setSelectedDepartureTimes([...selectedDepartureTimes, slot.time]);
+                          }
+                        }}
+                      >
                         <div className="text-xs text-gray-500">{slot.time}</div>
                         <div className="text-xs font-medium">{slot.label}</div>
                       </div>
@@ -250,7 +340,7 @@ export default function FlightResults({ results, isLoading }: FlightResultsProps
           {/* Main Results - Hybrid design */}
           <div className="flex-1">
             <div className="space-y-3">
-              {sortFlights(results.results, sortBy).map((flight, index) => (
+              {sortFlights(filterFlights(results.results), sortBy).map((flight, index) => (
                 <Card key={flight.id} className="hover:shadow-md transition-all duration-200 border border-gray-200">
                   <CardContent className="p-4">
                     {/* Top section with airline and price */}
