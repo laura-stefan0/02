@@ -279,13 +279,13 @@ export default function DestinationSelector({
         setRecentlyAdded(prev => prev.filter(code => code !== destination.code));
       }, 2000);
       
-      // Keep the results open in multi-select mode
+      // Keep the results open in multi-select mode and don't clear search term
     } else {
       setSelectedValues([destination]);
       onChange(destination.code);
       setShowResults(false);
+      setSearchTerm("");
     }
-    setSearchTerm("");
   };
 
   const handleDestinationRemove = (codeToRemove: string) => {
@@ -365,7 +365,7 @@ export default function DestinationSelector({
         <Input
           ref={inputRef}
           value={getDisplayValue()}
-          placeholder={selectedValues.length > 0 ? "Add another destination" : placeholder}
+          placeholder={placeholder}
           onChange={handleInputChange}
           onClick={handleInputClick}
           onFocus={handleInputClick}
