@@ -13,8 +13,6 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
-      <Route path="/deals" component={Deals} />
-      <Route path="/layover-explorer" component={LayoverExplorer} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -40,7 +38,7 @@ function App() {
                     Your smart flight search companion. Find the best deals, explore new destinations, and make every journey memorable.
                   </p>
                 </div>
-                
+
                 <div>
                   <h4 className="font-semibold mb-4">Explore</h4>
                   <ul className="space-y-2 text-gray-300">
@@ -50,7 +48,7 @@ function App() {
                   </ul>
                 </div>
               </div>
-              
+
               <div className="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
                 <p>&copy; 2025 FlightsHacked. Made with ❤️ for travelers worldwide.</p>
               </div>
