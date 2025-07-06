@@ -1,10 +1,7 @@
-import { useState } from "react";
-import { MapPin, ChevronDown, Globe, Search } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Label } from "@/components/ui/label";
 
+import { useState, useRef, useEffect } from "react";
+import { MapPin, Globe, X } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
 interface DestinationSelectorProps {
@@ -20,8 +17,11 @@ export default function DestinationSelector({
   placeholder = "Add destination",
   label = "To"
 }: DestinationSelectorProps) {
-  const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [showResults, setShowResults] = useState(false);
+  const [selectedValue, setSelectedValue] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+  const resultsRef = useRef<HTMLDivElement>(null);
 
   // Comprehensive destinations including cities, airports, countries, and regions
   const allDestinations = [
@@ -94,13 +94,10 @@ export default function DestinationSelector({
     { code: "eastern-europe", name: "Eastern Europe" },
     { code: "worldwide", name: "Anywhere in the world" },
   ];
-
-  // Check if this is the "From" field to determine behavior
-  const isFromField = label === "From";
   
   // Filter destinations based on search term
   const filteredDestinations = allDestinations.filter(dest => {
-    if (!searchTerm) return false; // Don't show anything when no search term
+    if (!searchTerm) return false;
     
     const search = searchTerm.toLowerCase();
     return (
@@ -121,119 +118,130 @@ export default function DestinationSelector({
   const allResults = [...filteredDestinations, ...anywhereOptions];
 
   const handleDestinationSelect = (destination: { code: string; name: string }) => {
+    const displayValue = destination.type === "airport" 
+      ? `${destination.city || destination.name} (${destination.code})`
+      : destination.name;
+    
+    setSelectedValue(displayValue);
+    setSearchTerm("");
+    setShowResults(false);
     onChange(destination.code);
-    setIsOpen(false);
   };
 
-  const handleRegionSelect = (region: { code: string; name: string }) => {
-    onChange(`anywhere:${region.code}`);
-    setIsOpen(false);
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value;
+    setSearchTerm(newValue);
+    setShowResults(newValue.length > 0);
+    
+    if (newValue === "") {
+      setSelectedValue("");
+      onChange("");
+    }
+  };
+
+  const handleClear = () => {
+    setSearchTerm("");
+    setSelectedValue("");
+    setShowResults(false);
+    onChange("");
+    inputRef.current?.focus();
   };
 
   const getDisplayValue = () => {
-    if (!value) return placeholder;
+    if (selectedValue) return selectedValue;
+    if (searchTerm) return searchTerm;
     
-    if (value.startsWith("anywhere:")) {
-      const regionCode = value.split(":")[1];
-      const region = regions.find(r => r.code === regionCode);
-      return region ? region.name : "Anywhere";
-    }
-    
-    const destination = allDestinations.find(d => d.code === value);
-    if (destination) {
-      if (destination.type === "airport") {
-        return `${destination.city || destination.name} (${destination.code})`;
+    if (value) {
+      if (value.startsWith("anywhere:")) {
+        const regionCode = value.split(":")[1];
+        const region = regions.find(r => r.code === regionCode);
+        return region ? region.name : "Anywhere";
       }
-      return destination.name;
+      
+      const destination = allDestinations.find(d => d.code === value);
+      if (destination) {
+        if (destination.type === "airport") {
+          return `${destination.city || destination.name} (${destination.code})`;
+        }
+        return destination.name;
+      }
+      
+      return value;
     }
     
-    return value;
+    return "";
   };
 
-  return (
-    <Popover open={isOpen} onOpenChange={setIsOpen}>
-      <PopoverTrigger asChild>
-        <div className="relative">
-          <Input
-            value={value ? getDisplayValue() : ""}
-            placeholder={placeholder}
-            onClick={() => setIsOpen(true)}
-            onChange={(e) => {
-              setSearchTerm(e.target.value);
-              if (!isOpen) setIsOpen(true);
-            }}
-            className={cn(
-              "w-full h-12 pl-10 pr-10 cursor-pointer",
-              !value && "text-muted-foreground"
-            )}
-            readOnly={!!value}
-          />
-          <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-          <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-        </div>
-      </PopoverTrigger>
-      <PopoverContent className="w-96 p-0" align="start">
-        {/* Search bar */}
-        <div className="p-3 border-b">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-            <Input
-              placeholder="Search destinations..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-              autoFocus
-            />
-          </div>
-        </div>
+  // Handle clicks outside to close results
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (resultsRef.current && !resultsRef.current.contains(event.target as Node) &&
+          inputRef.current && !inputRef.current.contains(event.target as Node)) {
+        setShowResults(false);
+      }
+    };
 
-        {/* Results */}
-        <div className="max-h-64 overflow-y-auto">
-          {searchTerm ? (
-            // Show filtered results when typing
-            <>
-              {allResults.map((destination) => (
-                <button
-                  key={destination.code}
-                  onClick={() => {
-                    if (destination.type === "anywhere") {
-                      handleRegionSelect(destination);
-                    } else {
-                      handleDestinationSelect(destination);
-                    }
-                  }}
-                  className="w-full text-left p-3 hover:bg-gray-50 flex items-center justify-between border-b border-gray-100 last:border-b-0"
-                >
-                  <div>
-                    <div className="font-medium">{destination.name}</div>
-                    <div className="text-sm text-gray-500">
-                      {destination.type === "airport" && destination.city && `${destination.city}, `}
-                      {destination.country}
-                      {destination.type === "region" && " • Region"}
-                      {destination.type === "country" && " • Country"}
-                      {destination.type === "anywhere" && " • Anywhere"}
-                    </div>
-                  </div>
-                  <div className="text-sm font-mono text-gray-400">
-                    {destination.type === "airport" ? destination.code : 
-                     destination.type === "anywhere" ? <Globe className="h-4 w-4" /> : ""}
-                  </div>
-                </button>
-              ))}
-              {allResults.length === 0 && (
-                <div className="p-3 text-center text-gray-500">
-                  No destinations found for "{searchTerm}"
-                </div>
-              )}
-            </>
-          ) : (
-            // Show instruction to start typing
-            <div className="p-3 text-center text-gray-500">
-              Start typing to search for destinations...
-            </div>
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  return (
+    <div className="relative">
+      <div className="relative">
+        <Input
+          ref={inputRef}
+          value={getDisplayValue()}
+          placeholder={placeholder}
+          onChange={handleInputChange}
+          onFocus={() => {
+            if (searchTerm) setShowResults(true);
+          }}
+          className={cn(
+            "w-full h-12 pl-10 pr-10",
+            !getDisplayValue() && "text-muted-foreground"
           )}
+        />
+        <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+        {(selectedValue || searchTerm) && (
+          <button
+            onClick={handleClear}
+            className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        )}
+      </div>
+
+      {/* Results dropdown */}
+      {showResults && allResults.length > 0 && (
+        <div 
+          ref={resultsRef}
+          className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-64 overflow-y-auto"
+        >
+          {allResults.map((destination) => (
+            <button
+              key={destination.code}
+              onClick={() => handleDestinationSelect(destination)}
+              className="w-full text-left p-3 hover:bg-gray-50 flex items-center justify-between border-b border-gray-100 last:border-b-0"
+            >
+              <div>
+                <div className="font-medium">{destination.name}</div>
+                <div className="text-sm text-gray-500">
+                  {destination.type === "airport" && destination.city && `${destination.city}, `}
+                  {destination.country}
+                  {destination.type === "region" && " • Region"}
+                  {destination.type === "country" && " • Country"}
+                  {destination.type === "anywhere" && " • Anywhere"}
+                </div>
+              </div>
+              <div className="text-sm font-mono text-gray-400">
+                {destination.type === "airport" ? destination.code : 
+                 destination.type === "anywhere" ? <Globe className="h-4 w-4" /> : ""}
+              </div>
+            </button>
+          ))}
         </div>
-      </PopoverContent>
-    </Popover>
+      )}
+    </div>
   );
 }
