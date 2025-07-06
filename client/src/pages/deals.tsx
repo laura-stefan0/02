@@ -1,12 +1,22 @@
-import { ExternalLink, Percent, Star, Clock } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ExternalLink, Percent, Star, Clock, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useFlightDeals } from "@/hooks/use-flight-search";
+import AirportSelector from "@/components/airport-selector";
+import { getNearestAirport, defaultDepartureAirports } from "@/lib/geolocation";
 
 export default function Deals() {
+  const [selectedAirport, setSelectedAirport] = useState<string | null>(null);
+  const [showAirportSelector, setShowAirportSelector] = useState(true);
   const { data: deals, isLoading } = useFlightDeals();
+
+  const handleAirportChange = (airport: { code: string; name: string; city: string; country: string }) => {
+    setSelectedAirport(airport.code);
+    setShowAirportSelector(false);
+  };
 
   const formatPrice = (price: number) => {
     return `€${(price / 100).toFixed(0)}`;
@@ -72,14 +82,45 @@ export default function Deals() {
     <div className="py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-10">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Featured Deals from Venice & Treviso</h1>
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+            Featured Deals {selectedAirport ? `from ${selectedAirport}` : 'from Your Area'}
+          </h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Discover amazing flight deals departing from your local airports
+            Discover amazing flight deals departing from your closest airport
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {deals?.map((deal) => (
+        {/* Airport Selector */}
+        {showAirportSelector && (
+          <AirportSelector
+            selectedAirport={selectedAirport}
+            onAirportChange={handleAirportChange}
+            title="Select Your Departure Airport"
+            subtitle="We'll show you the best deals from your chosen airport"
+          />
+        )}
+
+        {/* Change Airport Button */}
+        {!showAirportSelector && selectedAirport && (
+          <div className="text-center mb-8">
+            <Button
+              onClick={() => setShowAirportSelector(true)}
+              variant="outline"
+              className="mb-2"
+            >
+              <MapPin className="h-4 w-4 mr-2" />
+              Change Departure Airport
+            </Button>
+            <p className="text-sm text-gray-600">
+              Currently showing deals from {selectedAirport}
+            </p>
+          </div>
+        )}
+
+        {/* Only show deals if airport is selected */}
+        {!showAirportSelector && selectedAirport && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {deals?.map((deal) => (
             <Card key={deal.id} className={`${getDealGradient(deal.dealType)} text-white overflow-hidden shadow-lg hover:shadow-xl transition-shadow`}>
               <div 
                 className="h-48 relative bg-cover bg-center"
@@ -94,7 +135,7 @@ export default function Deals() {
               </div>
               <CardContent className="p-6">
                 <h3 className="text-xl font-bold mb-2">{deal.title}</h3>
-                <p className="text-white/80 mb-4">From {deal.fromAirport} • {deal.airline}</p>
+                <p className="text-white/80 mb-4">From {selectedAirport} • {deal.airline}</p>
                 <div className="flex items-center justify-between">
                   <div>
                     <span className="text-2xl font-bold">{formatPrice(deal.dealPrice)}</span>
@@ -111,9 +152,11 @@ export default function Deals() {
               </CardContent>
             </Card>
           ))}
-        </div>
+          </div>
+        )}
 
         {/* Venice & Treviso Airport Info */}
+        {!showAirportSelector && selectedAirport && (
         <div className="mt-16 grid grid-cols-1 md:grid-cols-2 gap-8">
           <Card>
             <CardContent className="p-6">
@@ -144,7 +187,8 @@ export default function Deals() {
               </ul>
             </CardContent>
           </Card>
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );

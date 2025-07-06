@@ -1,12 +1,21 @@
+import { useState } from "react";
 import { ExternalLink, Clock, MapPin, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useLongLayoverFlights } from "@/hooks/use-flight-search";
+import AirportSelector from "@/components/airport-selector";
 
 export default function LayoverExplorer() {
+  const [selectedAirport, setSelectedAirport] = useState<string | null>(null);
+  const [showAirportSelector, setShowAirportSelector] = useState(true);
   const { data: layoverFlights, isLoading } = useLongLayoverFlights();
+
+  const handleAirportChange = (airport: { code: string; name: string; city: string; country: string }) => {
+    setSelectedAirport(airport.code);
+    setShowAirportSelector(false);
+  };
 
   const formatPrice = (price: number) => {
     return `€${(price / 100).toFixed(0)}`;
@@ -44,14 +53,45 @@ export default function LayoverExplorer() {
     <div className="py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-10">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Long Layover Explorer</h1>
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+            Long Layover Explorer {selectedAirport ? `from ${selectedAirport}` : ''}
+          </h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
             Turn your layovers into mini-adventures. Discover flights with extended stopovers perfect for exploring new cities.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {layoverFlights?.map((flight) => (
+        {/* Airport Selector */}
+        {showAirportSelector && (
+          <AirportSelector
+            selectedAirport={selectedAirport}
+            onAirportChange={handleAirportChange}
+            title="Select Your Departure Airport"
+            subtitle="We'll find long layover flights from your chosen airport"
+          />
+        )}
+
+        {/* Change Airport Button */}
+        {!showAirportSelector && selectedAirport && (
+          <div className="text-center mb-8">
+            <Button
+              onClick={() => setShowAirportSelector(true)}
+              variant="outline"
+              className="mb-2"
+            >
+              <MapPin className="h-4 w-4 mr-2" />
+              Change Departure Airport
+            </Button>
+            <p className="text-sm text-gray-600">
+              Currently showing layover flights from {selectedAirport}
+            </p>
+          </div>
+        )}
+
+        {/* Only show flights if airport is selected */}
+        {!showAirportSelector && selectedAirport && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {layoverFlights?.map((flight) => (
             <Card key={flight.id} className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow">
               <div 
                 className="h-48 relative bg-cover bg-center"
@@ -71,7 +111,7 @@ export default function LayoverExplorer() {
               <CardContent className="p-6">
                 <div className="mb-4">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="font-semibold text-gray-900">{flight.route}</span>
+                    <span className="font-semibold text-gray-900">{selectedAirport} → {flight.route.split(' → ')[1]}</span>
                     <span className="text-brand-blue font-bold text-xl">{formatPrice(flight.price)}</span>
                   </div>
                   <p className="text-sm text-gray-600">{flight.airline} • Next departure: {flight.nextDeparture}</p>
@@ -105,9 +145,11 @@ export default function LayoverExplorer() {
               </CardContent>
             </Card>
           ))}
-        </div>
+          </div>
+        )}
 
         {/* Call to Action */}
+        {!showAirportSelector && selectedAirport && (
         <div className="text-center mt-12">
           <Card className="bg-gradient-to-br from-brand-blue to-brand-blue-dark text-white">
             <CardContent className="p-8">
@@ -122,6 +164,8 @@ export default function LayoverExplorer() {
             </CardContent>
           </Card>
         </div>
+
+        )}
 
         {/* Tips Section */}
         <div className="mt-16">

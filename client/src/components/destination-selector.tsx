@@ -482,14 +482,7 @@ export default function DestinationSelector({
                 <Globe className="h-4 w-4" />
                 Explore everywhere
               </button>
-              {multiSelect && !selectedValues.some(v => v.code === "ANYWHERE" || v.code.startsWith("anywhere:")) && (
-                <button
-                  onClick={() => handleDestinationAdd({ code: "ANYWHERE", name: "Explore everywhere", type: "anywhere" })}
-                  className="flex items-center gap-2 text-blue-600 hover:text-blue-700 text-sm font-medium"
-                >
-                  Select
-                </button>
-              )}
+
             </div>
           )}
 
