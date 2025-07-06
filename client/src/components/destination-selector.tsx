@@ -279,6 +279,14 @@ export default function DestinationSelector({
         setRecentlyAdded(prev => prev.filter(code => code !== destination.code));
       }, 2000);
       
+      // Auto-scroll to show the latest destination
+      setTimeout(() => {
+        const container = inputRef.current?.parentElement?.querySelector('.scrollbar-hide');
+        if (container) {
+          container.scrollTo({ left: container.scrollWidth, behavior: 'smooth' });
+        }
+      }, 100);
+      
       // Keep the results open in multi-select mode and don't clear search term
     } else {
       setSelectedValues([destination]);
@@ -351,18 +359,19 @@ export default function DestinationSelector({
         )}>
           <MapPin className="h-4 w-4 text-gray-500 mr-2 flex-shrink-0" />
           
-          {/* Selected destinations container */}
-          <div className="flex-1 flex items-center gap-1 overflow-hidden">
-            {/* Selected destinations as compact badges */}
+          {/* Selected destinations and input container */}
+          <div className="flex-1 flex items-center min-w-0">
+            {/* Selected destinations scrollable container */}
             {selectedValues.length > 0 && (
-              <div className="flex gap-1 overflow-x-auto scrollbar-hide">
+              <div className="flex gap-1 overflow-x-auto scrollbar-hide max-w-[70%] flex-shrink-0" 
+                   style={{ scrollBehavior: 'smooth' }}>
                 {selectedValues.map((destination, index) => (
                   <div key={destination.code} className="flex items-center gap-1 flex-shrink-0">
-                    <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-medium whitespace-nowrap">
+                    <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-medium whitespace-nowrap flex items-center gap-1">
                       {getDisplayName(destination)}
                       <button
                         onClick={() => handleDestinationRemove(destination.code)}
-                        className="ml-1 hover:text-red-600"
+                        className="hover:text-red-600"
                       >
                         <X className="h-3 w-3" />
                       </button>
@@ -375,7 +384,7 @@ export default function DestinationSelector({
               </div>
             )}
 
-            {/* Search input */}
+            {/* Search input with flexible width */}
             <input
               ref={inputRef}
               value={getDisplayValue()}
@@ -383,7 +392,10 @@ export default function DestinationSelector({
               onChange={handleInputChange}
               onClick={handleInputClick}
               onFocus={handleInputClick}
-              className="bg-transparent outline-none placeholder:text-gray-400 text-sm flex-1 min-w-[80px]"
+              className={cn(
+                "bg-transparent outline-none placeholder:text-gray-400 text-sm flex-1 min-w-[100px]",
+                selectedValues.length > 0 && "ml-2"
+              )}
             />
           </div>
           

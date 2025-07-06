@@ -10,6 +10,27 @@
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+/* Auto-scroll to show latest destination when new ones are added */
+.scrollbar-hide {
+  scroll-behavior: smooth;
+}
+
+/* Ensure smooth transitions when destinations are added/removed */
+.destination-badge {
+  transition: all 0.2s ease-in-out;
+}
 }
 
 :root {
@@ -33,7 +54,7 @@
   --destructive-foreground: hsl(60, 9.1%, 97.8%);
   --ring: hsl(217, 91%, 60%);
   --radius: 0.5rem;
-  
+
   /* Custom brand colors */
   --brand-blue: hsl(217, 91%, 60%);
   --brand-blue-dark: hsl(217, 91%, 50%);
@@ -79,55 +100,55 @@
   .hero-gradient {
     background: linear-gradient(135deg, var(--brand-blue) 0%, var(--brand-blue-dark) 100%);
   }
-  
+
   .brand-blue {
     color: var(--brand-blue);
   }
-  
+
   .bg-brand-blue {
     background-color: var(--brand-blue);
   }
-  
+
   .bg-brand-blue-dark {
     background-color: var(--brand-blue-dark);
   }
-  
+
   .bg-brand-amber {
     background-color: var(--brand-amber);
   }
-  
+
   .bg-brand-red {
     background-color: var(--brand-red);
   }
-  
+
   .bg-brand-emerald {
     background-color: var(--brand-emerald);
   }
-  
+
   .text-brand-blue {
     color: var(--brand-blue);
   }
-  
+
   .text-brand-amber {
     color: var(--brand-amber);
   }
-  
+
   .text-brand-red {
     color: var(--brand-red);
   }
-  
+
   .border-brand-blue {
     border-color: var(--brand-blue);
   }
-  
+
   .hover\:bg-brand-blue-dark:hover {
     background-color: var(--brand-blue-dark);
   }
-  
+
   .hover\:text-brand-blue:hover {
     color: var(--brand-blue);
   }
-  
+
   .focus\:ring-brand-blue:focus {
     --tw-ring-color: var(--brand-blue);
   }
