@@ -26,6 +26,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       let results = [];
       try {
+        // Validate date format for Amadeus API (must be YYYY-MM-DD)
+        const departureDateRegex = /^\d{4}-\d{2}-\d{2}$/;
+        if (!departureDateRegex.test(searchData.departureDate)) {
+          throw new Error(`Invalid departure date format: ${searchData.departureDate}. Expected YYYY-MM-DD`);
+        }
+
+        // Validate return date if provided
+        if (searchData.returnDate && !departureDateRegex.test(searchData.returnDate)) {
+          throw new Error(`Invalid return date format: ${searchData.returnDate}. Expected YYYY-MM-DD`);
+        }
+
         // Try real Amadeus API first
         results = await amadeusService.searchFlights({
           originLocationCode: fromAirport,

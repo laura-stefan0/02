@@ -79,9 +79,35 @@ export class AmadeusService {
         layoverDuration = `${Math.floor(layoverMinutes / 60)}h ${Math.floor(layoverMinutes % 60)}m`;
       }
 
+      // Map carrier codes to airline names
+      const carrierCodeToName: { [key: string]: string } = {
+        'LH': 'Lufthansa',
+        'AF': 'Air France',
+        'KL': 'KLM',
+        'BA': 'British Airways',
+        'EK': 'Emirates',
+        'QR': 'Qatar Airways',
+        'TK': 'Turkish Airlines',
+        'AA': 'American Airlines',
+        'DL': 'Delta',
+        'UA': 'United Airlines',
+        'SQ': 'Singapore Airlines',
+        'CX': 'Cathay Pacific',
+        'JL': 'Japan Airlines',
+        'NH': 'ANA',
+        'VS': 'Virgin Atlantic',
+        'IB': 'Iberia',
+        'AZ': 'Alitalia',
+        'SN': 'Brussels Airlines',
+        'OS': 'Austrian Airlines',
+        'LX': 'Swiss International'
+      };
+
+      const airlineName = carrierCodeToName[firstSegment.carrierCode] || firstSegment.carrierCode;
+
       return {
         id: index + 1,
-        airline: firstSegment.carrierCode,
+        airline: airlineName,
         flightNumber: `${firstSegment.carrierCode}${firstSegment.number}`,
         aircraftType: firstSegment.aircraft?.code || 'Unknown',
         fromAirport: firstSegment.departure.iataCode,
