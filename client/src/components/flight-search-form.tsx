@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Calendar, Plane, PlaneLanding, PlaneTakeoff, Settings, Globe, CalendarDays, Users } from "lucide-react";
+import { Calendar, Plane, PlaneLanding, PlaneTakeoff, Settings, Globe, CalendarDays, Users, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -76,10 +76,10 @@ export default function FlightSearchForm({ onSearchComplete }: FlightSearchFormP
     // Handle both string and array values
     const fromAirports = Array.isArray(values.fromAirport) ? values.fromAirport : [values.fromAirport];
     const toAirports = Array.isArray(values.toAirport) ? values.toAirport : [values.toAirport];
-    
+
     // Allow "ANYWHERE" as a valid destination to support "Explore everywhere"
     const isExploreEverywhere = toAirports.includes("ANYWHERE");
-    
+
     const searchParams: FlightSearchParams = {
       fromAirport: fromAirports.map(airport => airport.toUpperCase()),
       toAirport: isExploreEverywhere ? "ANYWHERE" : toAirports.map(airport => airport.toUpperCase()),
