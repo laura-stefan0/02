@@ -317,46 +317,46 @@ export default function DepartureSelector({
     <div className="relative">
       <div className="relative">
         <div className={cn(
-          "relative flex items-center min-h-[48px] border border-input rounded-md bg-background px-3 py-2 overflow-hidden transition-all duration-200",
-          showResults && "ring-2 ring-blue-500 ring-opacity-50 shadow-lg transform scale-[1.02] z-10"
+          "relative flex items-center min-h-[48px] border border-gray-300 rounded-md bg-white px-3 py-2 transition-all duration-200 hover:border-blue-400",
+          showResults && "border-blue-500 shadow-md ring-1 ring-blue-500 ring-opacity-20"
         )}>
-          <MapPin className="h-4 w-4 text-gray-400 mr-2 flex-shrink-0" />
+          <MapPin className="h-4 w-4 text-gray-500 mr-2 flex-shrink-0" />
           
-          {/* Selected destinations as inline badges with horizontal scroll */}
-          {selectedValues.length > 0 && (
-            <div className={cn(
-              "flex gap-1 mr-2 overflow-x-auto scrollbar-hide flex-shrink-0 transition-all duration-200",
-              showResults ? "max-w-[40%]" : "max-w-[60%]"
-            )}>
-              <div className="flex gap-1 whitespace-nowrap">
-                {selectedValues.map((destination) => (
-                  <Badge key={destination.code} variant="secondary" className="flex items-center gap-1 text-xs whitespace-nowrap flex-shrink-0">
-                    {getDisplayName(destination)}
-                    <button
-                      onClick={() => handleDestinationRemove(destination.code)}
-                      className="h-3 w-3 hover:text-red-600"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </Badge>
+          {/* Selected destinations container */}
+          <div className="flex-1 flex items-center gap-1 overflow-hidden">
+            {/* Selected destinations as compact badges */}
+            {selectedValues.length > 0 && (
+              <div className="flex gap-1 overflow-x-auto scrollbar-hide">
+                {selectedValues.map((destination, index) => (
+                  <div key={destination.code} className="flex items-center gap-1 flex-shrink-0">
+                    <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-medium whitespace-nowrap">
+                      {getDisplayName(destination)}
+                      <button
+                        onClick={() => handleDestinationRemove(destination.code)}
+                        className="ml-1 hover:text-red-600"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </span>
+                    {index < selectedValues.length - 1 && (
+                      <span className="text-gray-400 text-xs">+</span>
+                    )}
+                  </div>
                 ))}
               </div>
-            </div>
-          )}
-
-          {/* Search input */}
-          <input
-            ref={inputRef}
-            value={getDisplayValue()}
-            placeholder={selectedValues.length > 0 ? "Add another departure" : placeholder}
-            onChange={handleInputChange}
-            onClick={handleInputClick}
-            onFocus={handleInputClick}
-            className={cn(
-              "bg-transparent outline-none placeholder:text-muted-foreground transition-all duration-200",
-              showResults ? "flex-[2] min-w-[200px]" : "flex-1 min-w-0"
             )}
-          />
+
+            {/* Search input */}
+            <input
+              ref={inputRef}
+              value={getDisplayValue()}
+              placeholder={selectedValues.length > 0 ? "" : placeholder}
+              onChange={handleInputChange}
+              onClick={handleInputClick}
+              onFocus={handleInputClick}
+              className="bg-transparent outline-none placeholder:text-gray-400 text-sm flex-1 min-w-[80px]"
+            />
+          </div>
           
           {(selectedValues.length > 0 || searchTerm) && (
             <button
