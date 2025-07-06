@@ -219,31 +219,21 @@ export default function FlightSearchForm({ onSearchComplete }: FlightSearchFormP
                                   <FormLabel>Price Range</FormLabel>
                                   <FormControl>
                                     <div className="space-y-3">
-                                      <div className="grid grid-cols-2 gap-2">
-                                        <div>
-                                          <Label className="text-sm text-gray-500">Min Price (€)</Label>
-                                          <Input
-                                            type="number"
-                                            placeholder="0"
-                                            value={field.value?.[0] || 0}
-                                            onChange={(e) => {
-                                              const newValue = [parseInt(e.target.value) || 0, field.value?.[1] || 2000];
-                                              field.onChange(newValue);
-                                            }}
-                                          />
-                                        </div>
-                                        <div>
-                                          <Label className="text-sm text-gray-500">Max Price (€)</Label>
-                                          <Input
-                                            type="number"
-                                            placeholder="2000"
-                                            value={field.value?.[1] || 2000}
-                                            onChange={(e) => {
-                                              const newValue = [field.value?.[0] || 0, parseInt(e.target.value) || 2000];
-                                              field.onChange(newValue);
-                                            }}
-                                          />
-                                        </div>
+                                      <div className="flex justify-between text-sm text-gray-600">
+                                        <span>€{field.value?.[0] || 0}</span>
+                                        <span>€{field.value?.[1] || 2000}</span>
+                                      </div>
+                                      <Slider
+                                        value={field.value || [0, 2000]}
+                                        onValueChange={field.onChange}
+                                        max={2000}
+                                        min={0}
+                                        step={50}
+                                        className="w-full"
+                                      />
+                                      <div className="flex justify-between text-xs text-gray-500">
+                                        <span>€0</span>
+                                        <span>€2000</span>
                                       </div>
                                     </div>
                                   </FormControl>
@@ -330,31 +320,21 @@ export default function FlightSearchForm({ onSearchComplete }: FlightSearchFormP
                                   <FormLabel>Flight Duration (hours)</FormLabel>
                                   <FormControl>
                                     <div className="space-y-3">
-                                      <div className="grid grid-cols-2 gap-2">
-                                        <div>
-                                          <Label className="text-sm text-gray-500">Min Duration</Label>
-                                          <Input
-                                            type="number"
-                                            placeholder="0"
-                                            value={field.value?.[0] || 0}
-                                            onChange={(e) => {
-                                              const newValue = [parseInt(e.target.value) || 0, field.value?.[1] || 24];
-                                              field.onChange(newValue);
-                                            }}
-                                          />
-                                        </div>
-                                        <div>
-                                          <Label className="text-sm text-gray-500">Max Duration</Label>
-                                          <Input
-                                            type="number"
-                                            placeholder="24"
-                                            value={field.value?.[1] || 24}
-                                            onChange={(e) => {
-                                              const newValue = [field.value?.[0] || 0, parseInt(e.target.value) || 24];
-                                              field.onChange(newValue);
-                                            }}
-                                          />
-                                        </div>
+                                      <div className="flex justify-between text-sm text-gray-600">
+                                        <span>{field.value?.[0] || 0}h</span>
+                                        <span>{field.value?.[1] || 24}h</span>
+                                      </div>
+                                      <Slider
+                                        value={field.value || [0, 24]}
+                                        onValueChange={field.onChange}
+                                        max={24}
+                                        min={0}
+                                        step={1}
+                                        className="w-full"
+                                      />
+                                      <div className="flex justify-between text-xs text-gray-500">
+                                        <span>0h</span>
+                                        <span>24h</span>
                                       </div>
                                     </div>
                                   </FormControl>
