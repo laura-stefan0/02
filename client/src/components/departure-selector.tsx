@@ -1,6 +1,6 @@
 
 import { useState, useRef, useEffect } from "react";
-import { MapPin, X, Plus } from "lucide-react";
+import { MapPin, X, Plus, Check } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -23,6 +23,7 @@ export default function DepartureSelector({
   const [searchTerm, setSearchTerm] = useState("");
   const [showResults, setShowResults] = useState(false);
   const [selectedValues, setSelectedValues] = useState<Array<{code: string; name: string; type: string; city?: string; country?: string}>>([]);
+  const [recentlyAdded, setRecentlyAdded] = useState<string[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
 
@@ -226,6 +227,16 @@ export default function DepartureSelector({
       const newSelectedValues = [...selectedValues, destination];
       setSelectedValues(newSelectedValues);
       onChange(newSelectedValues.map(d => d.code));
+      
+      // Track recently added for UI feedback
+      setRecentlyAdded(prev => [...prev, destination.code]);
+      
+      // Remove from recently added after 2 seconds
+      setTimeout(() => {
+        setRecentlyAdded(prev => prev.filter(code => code !== destination.code));
+      }, 2000);
+      
+      // Keep the results open in multi-select mode
     } else {
       setSelectedValues([destination]);
       onChange(destination.code);
@@ -339,12 +350,23 @@ export default function DepartureSelector({
           className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-64 overflow-y-auto"
         >
           {sortedDestinations.map((destination) => (
-            <button
+            <div
               key={destination.code}
-              onClick={() => handleDestinationAdd(destination)}
               className="w-full text-left p-3 hover:bg-gray-50 flex items-center justify-between border-b border-gray-100 last:border-b-0"
             >
-              <div>
+              <button
+                onClick={() => {
+                  if (!multiSelect) {
+                    setSelectedValues([destination]);
+                    onChange(destination.code);
+                    setShowResults(false);
+                    setSearchTerm("");
+                  } else {
+                    handleDestinationAdd(destination);
+                  }
+                }}
+                className="flex-1 text-left"
+              >
                 <div className="font-medium">{destination.name}</div>
                 <div className="text-sm text-gray-500">
                   {destination.type === "airport" && destination.city && `${destination.city}, `}
@@ -352,14 +374,30 @@ export default function DepartureSelector({
                   {destination.type === "region" && " • Region"}
                   {destination.type === "country" && " • Country"}
                 </div>
-              </div>
+              </button>
               <div className="flex items-center gap-2">
                 <div className="text-sm font-mono text-gray-400">
                   {destination.type === "airport" ? destination.code : ""}
                 </div>
-                <Plus className="h-4 w-4 text-blue-600" />
+                {multiSelect && (
+                  <button
+                    onClick={() => handleDestinationAdd(destination)}
+                    className={cn(
+                      "w-6 h-6 text-white rounded flex items-center justify-center transition-colors",
+                      recentlyAdded.includes(destination.code)
+                        ? "bg-green-600 hover:bg-green-700"
+                        : "bg-blue-600 hover:bg-blue-700"
+                    )}
+                  >
+                    {recentlyAdded.includes(destination.code) ? (
+                      <Check className="h-4 w-4" />
+                    ) : (
+                      <Plus className="h-4 w-4" />
+                    )}
+                  </button>
+                )}
               </div>
-            </button>
+            </div>
           ))}
         </div>
       )}

@@ -1,6 +1,6 @@
 
 import { useState, useRef, useEffect } from "react";
-import { MapPin, Globe, X, Plus } from "lucide-react";
+import { MapPin, Globe, X, Plus, Check } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -23,6 +23,7 @@ export default function DestinationSelector({
   const [searchTerm, setSearchTerm] = useState("");
   const [showResults, setShowResults] = useState(false);
   const [selectedValues, setSelectedValues] = useState<Array<{code: string; name: string; type: string; city?: string; country?: string}>>([]);
+  const [recentlyAdded, setRecentlyAdded] = useState<string[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
 
@@ -269,6 +270,16 @@ export default function DestinationSelector({
       const newSelectedValues = [...selectedValues, destination];
       setSelectedValues(newSelectedValues);
       onChange(newSelectedValues.map(d => d.code));
+      
+      // Track recently added for UI feedback
+      setRecentlyAdded(prev => [...prev, destination.code]);
+      
+      // Remove from recently added after 2 seconds
+      setTimeout(() => {
+        setRecentlyAdded(prev => prev.filter(code => code !== destination.code));
+      }, 2000);
+      
+      // Keep the results open in multi-select mode
     } else {
       setSelectedValues([destination]);
       onChange(destination.code);
@@ -382,26 +393,62 @@ export default function DestinationSelector({
         >
           {/* Show "Explore everywhere" only when no search term and not already selected */}
           {!searchTerm && !selectedValues.some(s => s.code === "ANYWHERE") && (
-            <div className="p-3 border-b border-gray-200 bg-blue-50">
+            <div className="p-3 border-b border-gray-200 bg-blue-50 flex items-center justify-between">
               <button 
-                onClick={() => handleDestinationAdd({ code: "ANYWHERE", name: "Explore everywhere", type: "anywhere" })}
-                className="flex items-center gap-2 text-blue-600 hover:text-blue-700 text-sm font-medium w-full"
+                onClick={() => {
+                  if (!multiSelect) {
+                    setSelectedValues([{ code: "ANYWHERE", name: "Explore everywhere", type: "anywhere" }]);
+                    onChange("ANYWHERE");
+                    setShowResults(false);
+                    setSearchTerm("");
+                  } else {
+                    handleDestinationAdd({ code: "ANYWHERE", name: "Explore everywhere", type: "anywhere" });
+                  }
+                }}
+                className="flex items-center gap-2 text-blue-600 hover:text-blue-700 text-sm font-medium flex-1"
               >
                 <Globe className="h-4 w-4" />
                 Explore everywhere
-                <Plus className="h-4 w-4 ml-auto" />
               </button>
+              {multiSelect && (
+                <button
+                  onClick={() => handleDestinationAdd({ code: "ANYWHERE", name: "Explore everywhere", type: "anywhere" })}
+                  className={cn(
+                    "w-6 h-6 text-white rounded flex items-center justify-center transition-colors",
+                    recentlyAdded.includes("ANYWHERE")
+                      ? "bg-green-600 hover:bg-green-700"
+                      : "bg-blue-600 hover:bg-blue-700"
+                  )}
+                >
+                  {recentlyAdded.includes("ANYWHERE") ? (
+                    <Check className="h-4 w-4" />
+                  ) : (
+                    <Plus className="h-4 w-4" />
+                  )}
+                </button>
+              )}
             </div>
           )}
 
           {/* Show search results */}
           {searchResults.map((destination) => (
-            <button
+            <div
               key={destination.code}
-              onClick={() => handleDestinationAdd(destination)}
               className="w-full text-left p-3 hover:bg-gray-50 flex items-center justify-between border-b border-gray-100 last:border-b-0"
             >
-              <div>
+              <button
+                onClick={() => {
+                  if (!multiSelect) {
+                    setSelectedValues([destination]);
+                    onChange(destination.code);
+                    setShowResults(false);
+                    setSearchTerm("");
+                  } else {
+                    handleDestinationAdd(destination);
+                  }
+                }}
+                className="flex-1 text-left"
+              >
                 <div className="font-medium">{destination.name}</div>
                 <div className="text-sm text-gray-500">
                   {destination.type === "airport" && destination.city && `${destination.city}, `}
@@ -410,15 +457,31 @@ export default function DestinationSelector({
                   {destination.type === "country" && " • Country"}
                   {destination.type === "anywhere" && " • Anywhere"}
                 </div>
-              </div>
+              </button>
               <div className="flex items-center gap-2">
                 <div className="text-sm font-mono text-gray-400">
                   {destination.type === "airport" ? destination.code : 
                    destination.type === "anywhere" ? <Globe className="h-4 w-4" /> : ""}
                 </div>
-                <Plus className="h-4 w-4 text-blue-600" />
+                {multiSelect && (
+                  <button
+                    onClick={() => handleDestinationAdd(destination)}
+                    className={cn(
+                      "w-6 h-6 text-white rounded flex items-center justify-center transition-colors",
+                      recentlyAdded.includes(destination.code)
+                        ? "bg-green-600 hover:bg-green-700"
+                        : "bg-blue-600 hover:bg-blue-700"
+                    )}
+                  >
+                    {recentlyAdded.includes(destination.code) ? (
+                      <Check className="h-4 w-4" />
+                    ) : (
+                      <Plus className="h-4 w-4" />
+                    )}
+                  </button>
+                )}
               </div>
-            </button>
+            </div>
           ))}
         </div>
       )}
