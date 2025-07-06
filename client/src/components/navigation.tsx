@@ -10,6 +10,8 @@ export default function Navigation() {
 
   const navLinks = [
     { href: "/", label: "Search", id: "search" },
+    { href: "/deals", label: "Deals", id: "deals" },
+    { href: "/layover-explorer", label: "Long Layovers", id: "layovers" },
   ];
 
   const isActive = (href: string) => {
