@@ -65,24 +65,30 @@ export default function AirportSelector({ selectedAirport, onAirportChange, titl
 
         {/* Current Selection */}
         {selectedAirport && (
-          <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <Plane className="h-5 w-5 text-blue-600 mr-2" />
-                <div>
-                  <p className="font-medium text-blue-900">
-                    {airports.find(a => a.code === selectedAirport)?.name || selectedAirport}
-                  </p>
-                  <p className="text-sm text-blue-700">
-                    {airports.find(a => a.code === selectedAirport)?.city}, {airports.find(a => a.code === selectedAirport)?.country}
-                  </p>
+          <div className="mb-4">
+            <button
+              onClick={onBack}
+              className="w-full p-4 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 hover:border-blue-300 transition-colors"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <Plane className="h-5 w-5 text-blue-600 mr-2" />
+                  <div className="text-left">
+                    <p className="font-medium text-blue-900">
+                      {airports.find(a => a.code === selectedAirport)?.name || selectedAirport}
+                    </p>
+                    <p className="text-sm text-blue-700">
+                      {airports.find(a => a.code === selectedAirport)?.city}, {airports.find(a => a.code === selectedAirport)?.country}
+                    </p>
+                  </div>
                 </div>
+                <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                  <Check className="h-3 w-3 mr-1" />
+                  Selected
+                </Badge>
               </div>
-              <Badge variant="secondary" className="bg-blue-100 text-blue-800">
-                <Check className="h-3 w-3 mr-1" />
-                Selected
-              </Badge>
-            </div>
+            </button>
+            <p className="text-xs text-gray-600 text-center mt-2">Click to confirm and continue</p>
           </div>
         )}
 
