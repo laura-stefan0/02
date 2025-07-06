@@ -222,6 +222,19 @@ export default function DepartureSelector({
     return a.name.localeCompare(b.name);
   });
 
+  // Popular departure destinations to show when no search term (exclude selected)
+  const popularDepartures = [
+    { code: "VCE", name: "Venice", city: "Venice", country: "Italy", type: "airport" },
+    { code: "FCO", name: "Rome", city: "Rome", country: "Italy", type: "airport" },
+    { code: "MXP", name: "Milan", city: "Milan", country: "Italy", type: "airport" },
+    { code: "NAP", name: "Naples", city: "Naples", country: "Italy", type: "airport" },
+    { code: "BGY", name: "Bergamo", city: "Milan", country: "Italy", type: "airport" },
+    { code: "TSF", name: "Treviso", city: "Treviso", country: "Italy", type: "airport" },
+  ].filter(dest => !selectedValues.some(selected => selected.code === dest.code));
+
+  // Show popular destinations when no search term, otherwise show search results
+  const searchResults = searchTerm ? sortedDestinations : popularDepartures;
+
   const handleDestinationAdd = (destination: { code: string; name: string; type: string; city?: string; country?: string }) => {
     if (multiSelect) {
       const newSelectedValues = [...selectedValues, destination];
@@ -263,8 +276,8 @@ export default function DepartureSelector({
   };
 
   const handleInputClick = () => {
-    // Don't show anything on initial click for departure field unless searching
-    setShowResults(false);
+    // Show popular destinations on click for departure field  
+    setShowResults(true);
   };
 
   const handleClear = () => {
@@ -303,12 +316,18 @@ export default function DepartureSelector({
   return (
     <div className="relative">
       <div className="relative">
-        <div className="relative flex items-center min-h-[48px] border border-input rounded-md bg-background px-3 py-2 overflow-hidden">
+        <div className={cn(
+          "relative flex items-center min-h-[48px] border border-input rounded-md bg-background px-3 py-2 overflow-hidden transition-all duration-200",
+          showResults && "ring-2 ring-blue-500 ring-opacity-50 shadow-lg transform scale-[1.02] z-10"
+        )}>
           <MapPin className="h-4 w-4 text-gray-400 mr-2 flex-shrink-0" />
           
           {/* Selected destinations as inline badges with horizontal scroll */}
           {selectedValues.length > 0 && (
-            <div className="flex gap-1 mr-2 overflow-x-auto scrollbar-hide max-w-[60%] flex-shrink-0">
+            <div className={cn(
+              "flex gap-1 mr-2 overflow-x-auto scrollbar-hide flex-shrink-0 transition-all duration-200",
+              showResults ? "max-w-[40%]" : "max-w-[60%]"
+            )}>
               <div className="flex gap-1 whitespace-nowrap">
                 {selectedValues.map((destination) => (
                   <Badge key={destination.code} variant="secondary" className="flex items-center gap-1 text-xs whitespace-nowrap flex-shrink-0">
@@ -333,7 +352,10 @@ export default function DepartureSelector({
             onChange={handleInputChange}
             onClick={handleInputClick}
             onFocus={handleInputClick}
-            className="flex-1 bg-transparent outline-none placeholder:text-muted-foreground min-w-0"
+            className={cn(
+              "bg-transparent outline-none placeholder:text-muted-foreground transition-all duration-200",
+              showResults ? "flex-[2] min-w-[200px]" : "flex-1 min-w-0"
+            )}
           />
           
           {(selectedValues.length > 0 || searchTerm) && (
@@ -347,13 +369,13 @@ export default function DepartureSelector({
         </div>
       </div>
 
-      {/* Results dropdown - only show when typing */}
-      {showResults && searchTerm && (
+      {/* Results dropdown */}
+      {showResults && (
         <div 
           ref={resultsRef}
           className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-64 overflow-y-auto"
         >
-          {sortedDestinations.map((destination) => (
+          {searchResults.map((destination) => (
             <div
               key={destination.code}
               className="w-full text-left p-3 hover:bg-gray-50 flex items-center justify-between border-b border-gray-100 last:border-b-0"

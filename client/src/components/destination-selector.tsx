@@ -345,12 +345,18 @@ export default function DestinationSelector({
   return (
     <div className="relative">
       <div className="relative">
-        <div className="relative flex items-center min-h-[48px] border border-input rounded-md bg-background px-3 py-2 overflow-hidden">
+        <div className={cn(
+          "relative flex items-center min-h-[48px] border border-input rounded-md bg-background px-3 py-2 overflow-hidden transition-all duration-200",
+          showResults && "ring-2 ring-blue-500 ring-opacity-50 shadow-lg transform scale-[1.02] z-10"
+        )}>
           <MapPin className="h-4 w-4 text-gray-400 mr-2 flex-shrink-0" />
           
           {/* Selected destinations as inline badges with horizontal scroll */}
           {selectedValues.length > 0 && (
-            <div className="flex gap-1 mr-2 overflow-x-auto scrollbar-hide max-w-[60%] flex-shrink-0">
+            <div className={cn(
+              "flex gap-1 mr-2 overflow-x-auto scrollbar-hide flex-shrink-0 transition-all duration-200",
+              showResults ? "max-w-[40%]" : "max-w-[60%]"
+            )}>
               <div className="flex gap-1 whitespace-nowrap">
                 {selectedValues.map((destination) => (
                   <Badge key={destination.code} variant="secondary" className="flex items-center gap-1 text-xs whitespace-nowrap flex-shrink-0">
@@ -375,7 +381,10 @@ export default function DestinationSelector({
             onChange={handleInputChange}
             onClick={handleInputClick}
             onFocus={handleInputClick}
-            className="flex-1 bg-transparent outline-none placeholder:text-muted-foreground min-w-0"
+            className={cn(
+              "bg-transparent outline-none placeholder:text-muted-foreground transition-all duration-200",
+              showResults ? "flex-[2] min-w-[200px]" : "flex-1 min-w-0"
+            )}
           />
           
           {(selectedValues.length > 0 || searchTerm) && (
