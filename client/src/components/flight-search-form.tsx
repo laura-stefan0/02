@@ -107,7 +107,7 @@ export default function FlightSearchForm({ onSearchComplete }: FlightSearchFormP
   return (
     <div className="relative">
       {/* Hero Background */}
-      <div className="absolute inset-0 bg-brand-primary" />
+      <div className="absolute inset-0 bg-blue-700" />
 
       <div className="relative py-6 lg:py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -115,7 +115,7 @@ export default function FlightSearchForm({ onSearchComplete }: FlightSearchFormP
             <h2 className="text-4xl lg:text-6xl font-bold text-white mb-4">
               Hack your next flight
             </h2>
-            <p className="text-xl text-white/80 max-w-2xl mx-auto">
+            <p className="text-xl text-blue-100 max-w-2xl mx-auto">
               Use advanced filters to find smarter routes, better fares, and clever layovers others miss.
             </p>
           </div>
@@ -213,7 +213,7 @@ export default function FlightSearchForm({ onSearchComplete }: FlightSearchFormP
                     <Button 
                       type="submit" 
                       size="lg" 
-                      className="bg-brand-secondary hover:bg-brand-secondary/90 text-white font-semibold px-12 py-4 text-lg shadow-lg transition-all duration-200 hover:shadow-xl"
+                      className="bg-brand-blue hover:bg-brand-blue-dark text-white font-semibold px-12 py-4 text-lg"
                       disabled={isLoading}
                     >
                       {isLoading ? (
@@ -231,7 +231,7 @@ export default function FlightSearchForm({ onSearchComplete }: FlightSearchFormP
 
                     <Collapsible open={showAdvancedFilters} onOpenChange={setShowAdvancedFilters}>
                       <CollapsibleTrigger asChild>
-                        <Button type="button" variant="ghost" className="text-brand-primary hover:text-brand-primary-dark hover:bg-brand-surface">
+                        <Button type="button" variant="ghost" className="text-brand-blue">
                           <Settings className="h-4 w-4 mr-2" />
                           Advanced Filters
                         </Button>
@@ -242,9 +242,9 @@ export default function FlightSearchForm({ onSearchComplete }: FlightSearchFormP
                   {/* Advanced Filters */}
                   <Collapsible open={showAdvancedFilters} onOpenChange={setShowAdvancedFilters}>
                     <CollapsibleContent>
-                      <Card className="bg-brand-surface-secondary border-brand-primary/10">
+                      <Card className="bg-gray-50">
                         <CardContent className="p-6">
-                          <h3 className="text-lg font-semibold text-brand-primary mb-4">Advanced Filters</h3>
+                          <h3 className="text-lg font-semibold text-gray-900 mb-4">Advanced Filters</h3>
 
                           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {/* Price Range */}
@@ -337,7 +337,7 @@ export default function FlightSearchForm({ onSearchComplete }: FlightSearchFormP
                                             value={stop.value}
                                             checked={field.value === stop.value}
                                             onChange={() => field.onChange(stop.value)}
-                                            className="h-4 w-4 text-brand-primary border-gray-300 focus:ring-brand-primary"
+                                            className="h-4 w-4 text-brand-blue border-gray-300 focus:ring-brand-blue"
                                           />
                                           <Label htmlFor={`stops-${stop.value}`} className="text-sm text-gray-700 cursor-pointer">{stop.label}</Label>
                                         </div>
