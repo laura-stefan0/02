@@ -33,7 +33,7 @@ export default function AirportSelector({ selectedAirport, onAirportChange, titl
   const handleGetLocation = async () => {
     setIsLoading(true);
     setHasTriedGeolocation(true);
-    
+
     try {
       const result = await getNearestAirport();
       if (result) {
