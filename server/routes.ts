@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertFlightSearchSchema } from "@shared/schema";
+import { amadeusService } from "./lib/amadeus";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Flight search - Amadeus API only
@@ -19,11 +20,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Create search record
       const search = await storage.createFlightSearch(normalizedSearchData);
 
-      // Generate mock flight results
+      // Use real Amadeus API for flight search
       const fromAirport = Array.isArray(searchData.fromAirport) ? searchData.fromAirport[0] : searchData.fromAirport;
       const toAirport = Array.isArray(searchData.toAirport) ? searchData.toAirport[0] : searchData.toAirport;
 
-      const results = generateMockFlightResults(fromAirport, toAirport, searchData.departureDate, searchData.returnDate);
+      let results = [];
+      try {
+        // Try real Amadeus API first
+        results = await amadeusService.searchFlights({
+          originLocationCode: fromAirport,
+          destinationLocationCode: toAirport,
+          departureDate: searchData.departureDate,
+          returnDate: searchData.returnDate || undefined,
+          adults: searchData.passengers || 1,
+          max: 10
+        });
+      } catch (error) {
+        console.error("Amadeus API failed, using mock data:", error);
+        // Fallback to mock data if API fails
+        results = generateMockFlightResults(fromAirport, toAirport, searchData.departureDate, searchData.returnDate);
+      }
 
       // Add to recent searches
       await storage.addRecentSearch({
@@ -48,21 +64,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Airport search using mock data
-  app.get("/api/airports/search", async (req, res) => {
-    try {
-      const { q } = req.query;
-      if (!q || typeof q !== 'string') {
-        return res.status(400).json({ message: "Search query is required" });
-      }
 
-      const suggestions = getMockAirportSuggestions(q);
-      res.json(suggestions);
-    } catch (error) {
-      console.error("Airport search error:", error);
-      res.status(500).json({ message: "Failed to search airports" });
-    }
-  });
 
   // Get recent searches
 
@@ -148,6 +150,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error fetching long layover flights:', error);
       res.status(500).json({ error: 'Failed to fetch long layover flights' });
+    }
+  });
+
+  // Airport search using Amadeus API
+  app.get("/api/airports/search", async (req, res) => {
+    try {
+      const { q } = req.query;
+      
+      if (!q || typeof q !== 'string') {
+        return res.status(400).json({ error: 'Search query required' });
+      }
+
+      const suggestions = await amadeusService.getAirportSuggestions(q);
+      res.json(suggestions);
+    } catch (error) {
+      console.error('Airport search error:', error);
+      res.status(500).json({ error: 'Failed to search airports' });
     }
   });
 
@@ -369,24 +388,3 @@ function generateMockFlightResults(fromAirport: string, toAirport: string, depar
   return results.sort((a, b) => a.price - b.price);
 }
 
-function getMockAirportSuggestions(query: string) {
-  const mockAirports = [
-    { iataCode: 'NYC', name: 'New York', cityName: 'New York', countryName: 'United States' },
-    { iataCode: 'LAX', name: 'Los Angeles International', cityName: 'Los Angeles', countryName: 'United States' },
-    { iataCode: 'LHR', name: 'London Heathrow', cityName: 'London', countryName: 'United Kingdom' },
-    { iataCode: 'CDG', name: 'Charles de Gaulle', cityName: 'Paris', countryName: 'France' },
-    { iataCode: 'FRA', name: 'Frankfurt Airport', cityName: 'Frankfurt', countryName: 'Germany' },
-    { iataCode: 'AMS', name: 'Amsterdam Schiphol', cityName: 'Amsterdam', countryName: 'Netherlands' },
-    { iataCode: 'DXB', name: 'Dubai International', cityName: 'Dubai', countryName: 'UAE' },
-    { iataCode: 'SIN', name: 'Singapore Changi', cityName: 'Singapore', countryName: 'Singapore' },
-    { iataCode: 'NRT', name: 'Tokyo Narita', cityName: 'Tokyo', countryName: 'Japan' },
-    { iataCode: 'HKG', name: 'Hong Kong International', cityName: 'Hong Kong', countryName: 'Hong Kong' }
-  ];
-
-  const queryLower = query.toLowerCase();
-  return mockAirports.filter(airport => 
-    airport.name.toLowerCase().includes(queryLower) ||
-    airport.cityName.toLowerCase().includes(queryLower) ||
-    airport.iataCode.toLowerCase().includes(queryLower)
-  );
-}

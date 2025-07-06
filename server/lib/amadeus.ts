@@ -5,10 +5,12 @@ export class AmadeusService {
   private amadeus: any;
 
   constructor() {
+
+    
     this.amadeus = new Amadeus({
-      clientId: process.env.AMADEUS_API_KEY,
-      clientSecret: process.env.AMADEUS_API_SECRET,
-      hostname: 'production' // Use 'test' for testing, 'production' for live
+      clientId: process.env.AMADEUS_CLIENT_ID,
+      clientSecret: process.env.AMADEUS_CLIENT_SECRET,
+      hostname: 'test' // Use 'test' for testing, 'production' for live
     });
   }
 
@@ -37,6 +39,7 @@ export class AmadeusService {
       return this.transformFlightResults(response.data);
     } catch (error) {
       console.error('Amadeus API error:', error);
+      console.error('Error details:', error.response?.data || error.message);
       throw new Error('Failed to search flights');
     }
   }
@@ -50,6 +53,7 @@ export class AmadeusService {
       return response.data;
     } catch (error) {
       console.error('Amadeus airport search error:', error);
+      console.error('Error details:', error.response?.data || error.message);
       return [];
     }
   }
