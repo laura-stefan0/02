@@ -36,16 +36,7 @@ export default function Deals() {
   };
 
   const getDealGradient = (dealType: string) => {
-    switch (dealType) {
-      case "percentage":
-        return "bg-gradient-to-br from-blue-600 to-blue-800";
-      case "best-deal":
-        return "bg-gradient-to-br from-amber-500 to-orange-500";
-      case "limited":
-        return "bg-gradient-to-br from-emerald-500 to-emerald-600";
-      default:
-        return "bg-gradient-to-br from-blue-600 to-blue-800";
-    }
+    return "bg-white shadow-lg hover:shadow-xl transition-shadow";
   };
 
   if (isLoading) {
@@ -121,32 +112,34 @@ export default function Deals() {
         {!showAirportSelector && selectedAirport && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {deals?.map((deal) => (
-            <Card key={deal.id} className={`${getDealGradient(deal.dealType)} text-white overflow-hidden shadow-lg hover:shadow-xl transition-shadow`}>
+            <Card key={deal.id} className={`${getDealGradient(deal.dealType)} overflow-hidden`}>
               <div 
                 className="h-48 relative bg-cover bg-center"
                 style={{
                   backgroundImage: `url(${deal.imageUrl || 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad'})`,
                 }}
               >
-                <div className="absolute inset-0 bg-black bg-opacity-40"></div>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                 <div className="absolute top-4 right-4">
                   {getDealBadge(deal.dealType)}
                 </div>
+                <div className="absolute bottom-4 left-4 text-white">
+                  <h3 className="text-xl font-bold">{deal.title}</h3>
+                  <p className="text-white/90">From {selectedAirport} • {deal.airline}</p>
+                </div>
               </div>
               <CardContent className="p-6">
-                <h3 className="text-xl font-bold mb-2">{deal.title}</h3>
-                <p className="text-white/80 mb-4">From {selectedAirport} • {deal.airline}</p>
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between mb-4">
                   <div>
-                    <span className="text-2xl font-bold">{formatPrice(deal.dealPrice)}</span>
-                    <span className="text-white/60 line-through ml-2">{formatPrice(deal.originalPrice)}</span>
+                    <span className="text-2xl font-bold text-brand-blue">{formatPrice(deal.dealPrice)}</span>
+                    <span className="text-gray-500 line-through ml-2">{formatPrice(deal.originalPrice)}</span>
                   </div>
-                  <Button variant="secondary" className="font-semibold">
+                  <Button className="bg-brand-blue hover:bg-brand-blue-dark">
                     <ExternalLink className="h-4 w-4 mr-2" />
                     View Deal
                   </Button>
                 </div>
-                <div className="mt-4 text-sm text-white/80">
+                <div className="text-sm text-gray-600">
                   Valid until: {new Date(deal.validUntil).toLocaleDateString()}
                 </div>
               </CardContent>
