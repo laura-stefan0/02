@@ -25,6 +25,15 @@ export default function FlightResults({ results, isLoading }: FlightResultsProps
   const [sortBy, setSortBy] = useState<'best' | 'cheapest' | 'fastest'>('best');
   const { toast } = useToast();
 
+  // Helper function to convert duration to minutes
+  const getDurationMinutes = (duration: string) => {
+    const matches = duration.match(/(\d+)h\s*(\d+)?m?/);
+    if (!matches) return 0;
+    const hours = parseInt(matches[1]) || 0;
+    const minutes = parseInt(matches[2]) || 0;
+    return hours * 60 + minutes;
+  };
+
   // Sorting function
   const sortFlights = (flights: FlightResult[], sortType: 'best' | 'cheapest' | 'fastest') => {
     const sorted = [...flights];
@@ -33,14 +42,6 @@ export default function FlightResults({ results, isLoading }: FlightResultsProps
       case 'cheapest':
         return sorted.sort((a, b) => a.price - b.price);
       case 'fastest':
-        // Convert duration to minutes for comparison
-        const getDurationMinutes = (duration: string) => {
-          const matches = duration.match(/(\d+)h\s*(\d+)?m?/);
-          if (!matches) return 0;
-          const hours = parseInt(matches[1]) || 0;
-          const minutes = parseInt(matches[2]) || 0;
-          return hours * 60 + minutes;
-        };
         return sorted.sort((a, b) => getDurationMinutes(a.duration) - getDurationMinutes(b.duration));
       case 'best':
       default:
@@ -64,14 +65,6 @@ export default function FlightResults({ results, isLoading }: FlightResultsProps
     setTimeout(() => {
       window.open(`https://www.google.com/flights#flt=${flight.fromAirport}.${flight.toAirport}.${new Date().toISOString().split('T')[0]};c:EUR;e:1;sd:1;t:f`, '_blank');
     }, 1000);
-  };
-
-  const getDurationMinutes = (duration: string) => {
-    const matches = duration.match(/(\d+)h\s*(\d+)?m?/);
-    if (!matches) return 0;
-    const hours = parseInt(matches[1]) || 0;
-    const minutes = parseInt(matches[2]) || 0;
-    return hours * 60 + minutes;
   };
   if (isLoading) {
     return (
