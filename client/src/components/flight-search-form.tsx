@@ -208,27 +208,8 @@ export default function FlightSearchForm({ onSearchComplete }: FlightSearchFormP
                     />
                   </div>
 
-                  {/* Search Button and Advanced Filters Toggle */}
-                  <div className="flex justify-between items-center">
-                    <Button 
-                      type="submit" 
-                      size="lg" 
-                      className="bg-brand-blue hover:bg-brand-blue-dark text-white font-semibold px-12 py-4 text-lg"
-                      disabled={isLoading}
-                    >
-                      {isLoading ? (
-                        <>
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                          Searching...
-                        </>
-                      ) : (
-                        <>
-                          <Plane className="h-5 w-5 mr-2" />
-                          Search Flights
-                        </>
-                      )}
-                    </Button>
-
+                  {/* Advanced Filters Toggle */}
+                  <div className="flex justify-end">
                     <Collapsible open={showAdvancedFilters} onOpenChange={setShowAdvancedFilters}>
                       <CollapsibleTrigger asChild>
                         <Button type="button" variant="ghost" className="text-brand-blue">
@@ -419,6 +400,28 @@ export default function FlightSearchForm({ onSearchComplete }: FlightSearchFormP
                       </Card>
                     </CollapsibleContent>
                   </Collapsible>
+
+                  {/* Search Button */}
+                  <div className="text-center">
+                    <Button 
+                      type="submit" 
+                      size="lg" 
+                      className="bg-brand-blue hover:bg-brand-blue-dark text-white font-semibold px-12 py-4 text-lg"
+                      disabled={isLoading}
+                    >
+                      {isLoading ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                          Searching...
+                        </>
+                      ) : (
+                        <>
+                          <Plane className="h-5 w-5 mr-2" />
+                          Search Flights
+                        </>
+                      )}
+                    </Button>
+                  </div>
 
                   {error && (
                     <div className="text-center text-red-600">
