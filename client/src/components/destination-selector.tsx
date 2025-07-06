@@ -262,8 +262,8 @@ export default function DestinationSelector({
     { code: "VIE", name: "Vienna", city: "Vienna", country: "Austria", type: "airport" },
   ].filter(dest => !selectedValues.some(selected => selected.code === dest.code));
 
-  // Show popular destinations when no search term, otherwise show search results
-  const searchResults = searchTerm ? [...anywhereOptions, ...sortedDestinations] : popularDestinations;
+  // Show popular destinations when no search term, otherwise show search results (limit to 5)
+  const searchResults = searchTerm ? [...anywhereOptions, ...sortedDestinations].slice(0, 5) : popularDestinations.slice(0, 5);
 
   const handleDestinationAdd = (destination: { code: string; name: string; type: string; city?: string; country?: string }) => {
     if (multiSelect) {
@@ -429,7 +429,7 @@ export default function DestinationSelector({
       {showResults && (
         <div 
           ref={resultsRef}
-          className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-64 overflow-y-auto"
+          className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-gray-200 rounded-md shadow-lg"
         >
           {/* Already included section */}
           {selectedValues.length > 0 && (
