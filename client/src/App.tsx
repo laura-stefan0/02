@@ -34,7 +34,7 @@ function App() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div className="col-span-1 md:col-span-2">
                   <h3 className="text-2xl font-bold text-brand-blue mb-4">
-                    FlightFinder
+                    FlightsHacked
                   </h3>
                   <p className="text-gray-300 mb-6 max-w-md">
                     Your smart flight search companion. Find the best deals, explore new destinations, and make every journey memorable.
@@ -52,7 +52,7 @@ function App() {
               </div>
               
               <div className="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
-                <p>&copy; 2025 FlightFinder. Made with ❤️ for travelers worldwide.</p>
+                <p>&copy; 2025 FlightsHacked. Made with ❤️ for travelers worldwide.</p>
               </div>
             </div>
           </footer>

@@ -28,7 +28,7 @@ export default function Navigation() {
             <Link href="/" className="flex items-center">
               <Plane className="h-8 w-8 text-brand-blue mr-2" />
               <h1 className="text-2xl font-bold text-brand-blue">
-                FlightFinder
+                FlightsHacked
               </h1>
             </Link>
           </div>
@@ -64,7 +64,7 @@ export default function Navigation() {
                 <div className="flex items-center mb-8">
                   <Plane className="h-6 w-6 text-brand-blue mr-2" />
                   <span className="text-lg font-bold text-brand-blue">
-                    FlightFinder
+                    FlightsHacked
                   </span>
                 </div>
                 <nav className="space-y-4">
