@@ -206,13 +206,14 @@ export default function DepartureDateSelector({ value, onChange, placeholder = "
 
   const renderYearView = () => {
     const currentYear = new Date().getFullYear();
+    const currentMonth = new Date().getMonth();
     const months = [];
     
-    for (let i = 0; i < 12; i++) {
+    // Only show months from current month onwards
+    for (let i = currentMonth; i < 12; i++) {
       const month = new Date(currentYear, i);
       const monthKey = `${currentYear}-${i}`;
       const isSelected = selectedMonths.includes(monthKey);
-      const isPast = isBefore(endOfMonth(month), new Date());
       
       months.push(
         <Button
@@ -221,10 +222,9 @@ export default function DepartureDateSelector({ value, onChange, placeholder = "
           size="sm"
           className={cn(
             "h-16 text-xs",
-            isSelected && "bg-brand-blue text-white",
-            isPast && "opacity-50"
+            isSelected && "bg-brand-blue text-white"
           )}
-          onClick={() => !isPast && handleMonthToggle(monthKey)}
+          onClick={() => handleMonthToggle(monthKey)}
         >
           {format(month, "MMM")}
         </Button>
@@ -279,32 +279,6 @@ export default function DepartureDateSelector({ value, onChange, placeholder = "
 
           <div className="p-4">
             <TabsContent value="specific" className="space-y-4 mt-0">
-              <div className="grid grid-cols-2 gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleOptionSelect({ 
-                    name: "Today", 
-                    value: format(new Date(), "yyyy-MM-dd") 
-                  })}
-                  className="justify-start"
-                >
-                  <Calendar className="h-4 w-4 mr-2" />
-                  Today
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleOptionSelect({ 
-                    name: "Tomorrow", 
-                    value: format(addDays(new Date(), 1), "yyyy-MM-dd") 
-                  })}
-                  className="justify-start"
-                >
-                  <Calendar className="h-4 w-4 mr-2" />
-                  Tomorrow
-                </Button>
-              </div>
               {renderCalendar()}
             </TabsContent>
 
@@ -374,35 +348,8 @@ export default function DepartureDateSelector({ value, onChange, placeholder = "
             </TabsContent>
 
             <TabsContent value="flexible" className="space-y-4 mt-0">
-              <div className="grid grid-cols-1 gap-2 mb-4">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleOptionSelect({ 
-                    name: "This Month", 
-                    value: `flexible:${format(startOfMonth(new Date()), "yyyy-MM-dd")}:${format(endOfMonth(new Date()), "yyyy-MM-dd")}`
-                  })}
-                  className="justify-start"
-                >
-                  <CalendarDays className="h-4 w-4 mr-2" />
-                  This Month
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleOptionSelect({ 
-                    name: "Next Month", 
-                    value: `flexible:${format(startOfMonth(addMonths(new Date(), 1)), "yyyy-MM-dd")}:${format(endOfMonth(addMonths(new Date(), 1)), "yyyy-MM-dd")}`
-                  })}
-                  className="justify-start"
-                >
-                  <CalendarDays className="h-4 w-4 mr-2" />
-                  Next Month
-                </Button>
-              </div>
-              <hr className="my-3" />
               <div>
-                <p className="text-sm font-medium mb-3">Select Multiple Months:</p>
+                <p className="text-sm font-medium mb-3">Select one or more months:</p>
                 {renderYearView()}
               </div>
             </TabsContent>
