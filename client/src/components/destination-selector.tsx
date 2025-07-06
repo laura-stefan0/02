@@ -267,6 +267,20 @@ export default function DestinationSelector({
 
   const handleDestinationAdd = (destination: { code: string; name: string; type: string; city?: string; country?: string }) => {
     if (multiSelect) {
+      // For "Anywhere" option, don't allow other destinations
+      if (destination.code === "ANYWHERE" || destination.code.startsWith("anywhere:")) {
+        setSelectedValues([destination]);
+        onChange([destination.code]);
+        setShowResults(false);
+        setSearchTerm("");
+        return;
+      }
+      
+      // Don't allow other destinations if "Anywhere" is already selected
+      if (selectedValues.some(v => v.code === "ANYWHERE" || v.code.startsWith("anywhere:"))) {
+        return;
+      }
+      
       const newSelectedValues = [...selectedValues, destination];
       setSelectedValues(newSelectedValues);
       onChange(newSelectedValues.map(d => d.code));
@@ -287,7 +301,8 @@ export default function DestinationSelector({
         }
       }, 100);
       
-      // Keep the results open in multi-select mode and don't clear search term
+      // Clear search term when destination is added
+      setSearchTerm("");
     } else {
       setSelectedValues([destination]);
       onChange(destination.code);
@@ -416,6 +431,38 @@ export default function DestinationSelector({
           ref={resultsRef}
           className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-64 overflow-y-auto"
         >
+          {/* Already included section */}
+          {selectedValues.length > 0 && (
+            <div className="border-b border-gray-200 bg-gray-50">
+              <div className="p-2 text-xs font-medium text-gray-500 uppercase tracking-wide">
+                Already included
+              </div>
+              {selectedValues.map((destination) => (
+                <div
+                  key={destination.code}
+                  className="flex items-center justify-between p-3 hover:bg-gray-100 border-b border-gray-100 last:border-b-0"
+                >
+                  <div className="flex-1">
+                    <div className="font-medium text-gray-700">{destination.name}</div>
+                    <div className="text-sm text-gray-500">
+                      {destination.type === "airport" && destination.city && `${destination.city}, `}
+                      {destination.country}
+                      {destination.type === "region" && " • Region"}
+                      {destination.type === "country" && " • Country"}
+                      {destination.type === "anywhere" && " • Anywhere"}
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => handleDestinationRemove(destination.code)}
+                    className="w-6 h-6 text-gray-400 hover:text-red-600 rounded flex items-center justify-center transition-colors"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
           {/* Show "Explore everywhere" only when no search term and not already selected */}
           {!searchTerm && !selectedValues.some(s => s.code === "ANYWHERE") && (
             <div className="p-3 border-b border-gray-200 bg-blue-50 flex items-center justify-between">
@@ -435,79 +482,89 @@ export default function DestinationSelector({
                 <Globe className="h-4 w-4" />
                 Explore everywhere
               </button>
-              {multiSelect && (
+              {multiSelect && !selectedValues.some(v => v.code === "ANYWHERE" || v.code.startsWith("anywhere:")) && (
                 <button
                   onClick={() => handleDestinationAdd({ code: "ANYWHERE", name: "Explore everywhere", type: "anywhere" })}
-                  className={cn(
-                    "w-6 h-6 text-white rounded flex items-center justify-center transition-colors",
-                    recentlyAdded.includes("ANYWHERE")
-                      ? "bg-green-600 hover:bg-green-700"
-                      : "bg-blue-600 hover:bg-blue-700"
-                  )}
+                  className="flex items-center gap-2 text-blue-600 hover:text-blue-700 text-sm font-medium"
                 >
-                  {recentlyAdded.includes("ANYWHERE") ? (
-                    <Check className="h-4 w-4" />
-                  ) : (
-                    <Plus className="h-4 w-4" />
-                  )}
+                  Select
                 </button>
               )}
             </div>
           )}
 
           {/* Show search results */}
-          {searchResults.map((destination) => (
-            <div
-              key={destination.code}
-              className="w-full text-left p-3 hover:bg-gray-50 flex items-center justify-between border-b border-gray-100 last:border-b-0"
-            >
-              <button
-                onClick={() => {
-                  if (!multiSelect) {
-                    setSelectedValues([destination]);
-                    onChange(destination.code);
-                    setShowResults(false);
-                    setSearchTerm("");
-                  } else {
-                    handleDestinationAdd(destination);
-                  }
-                }}
-                className="flex-1 text-left"
-              >
-                <div className="font-medium">{destination.name}</div>
-                <div className="text-sm text-gray-500">
-                  {destination.type === "airport" && destination.city && `${destination.city}, `}
-                  {destination.country}
-                  {destination.type === "region" && " • Region"}
-                  {destination.type === "country" && " • Country"}
-                  {destination.type === "anywhere" && " • Anywhere"}
-                </div>
-              </button>
-              <div className="flex items-center gap-2">
-                <div className="text-sm font-mono text-gray-400">
-                  {destination.type === "airport" ? destination.code : 
-                   destination.type === "anywhere" ? <Globe className="h-4 w-4" /> : ""}
-                </div>
-                {multiSelect && (
-                  <button
-                    onClick={() => handleDestinationAdd(destination)}
-                    className={cn(
-                      "w-6 h-6 text-white rounded flex items-center justify-center transition-colors",
-                      recentlyAdded.includes(destination.code)
-                        ? "bg-green-600 hover:bg-green-700"
-                        : "bg-blue-600 hover:bg-blue-700"
-                    )}
-                  >
-                    {recentlyAdded.includes(destination.code) ? (
-                      <Check className="h-4 w-4" />
-                    ) : (
-                      <Plus className="h-4 w-4" />
-                    )}
-                  </button>
+          {searchResults.map((destination) => {
+            const isAnywhere = destination.code === "ANYWHERE" || destination.code.startsWith("anywhere:");
+            const hasAnywhereSelected = selectedValues.some(v => v.code === "ANYWHERE" || v.code.startsWith("anywhere:"));
+            const isDisabled = hasAnywhereSelected && !isAnywhere;
+            
+            return (
+              <div
+                key={destination.code}
+                className={cn(
+                  "w-full text-left p-3 flex items-center justify-between border-b border-gray-100 last:border-b-0",
+                  isDisabled ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-50"
                 )}
+              >
+                <button
+                  onClick={() => {
+                    if (isDisabled) return;
+                    if (!multiSelect) {
+                      setSelectedValues([destination]);
+                      onChange(destination.code);
+                      setShowResults(false);
+                      setSearchTerm("");
+                    } else {
+                      handleDestinationAdd(destination);
+                    }
+                  }}
+                  className="flex-1 text-left"
+                  disabled={isDisabled}
+                >
+                  <div className="font-medium">{destination.name}</div>
+                  <div className="text-sm text-gray-500">
+                    {destination.type === "airport" && destination.city && `${destination.city}, `}
+                    {destination.country}
+                    {destination.type === "region" && " • Region"}
+                    {destination.type === "country" && " • Country"}
+                    {destination.type === "anywhere" && " • Anywhere"}
+                  </div>
+                </button>
+                <div className="flex items-center gap-2">
+                  <div className="text-sm font-mono text-gray-400">
+                    {destination.type === "airport" ? destination.code : 
+                     destination.type === "anywhere" ? <Globe className="h-4 w-4" /> : ""}
+                  </div>
+                  {multiSelect && !isAnywhere && !isDisabled && (
+                    <button
+                      onClick={() => handleDestinationAdd(destination)}
+                      className={cn(
+                        "w-6 h-6 text-white rounded flex items-center justify-center transition-colors",
+                        recentlyAdded.includes(destination.code)
+                          ? "bg-green-600 hover:bg-green-700"
+                          : "bg-blue-600 hover:bg-blue-700"
+                      )}
+                    >
+                      {recentlyAdded.includes(destination.code) ? (
+                        <Check className="h-4 w-4" />
+                      ) : (
+                        <Plus className="h-4 w-4" />
+                      )}
+                    </button>
+                  )}
+                  {multiSelect && isAnywhere && (
+                    <button
+                      onClick={() => handleDestinationAdd(destination)}
+                      className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                    >
+                      Select
+                    </button>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

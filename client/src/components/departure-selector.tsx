@@ -257,7 +257,8 @@ export default function DepartureSelector({
         }
       }, 100);
       
-      // Keep the results open in multi-select mode and don't clear search term
+      // Clear search term when destination is added
+      setSearchTerm("");
     } else {
       setSelectedValues([destination]);
       onChange(destination.code);
@@ -387,6 +388,37 @@ export default function DepartureSelector({
           ref={resultsRef}
           className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-64 overflow-y-auto"
         >
+          {/* Already included section */}
+          {selectedValues.length > 0 && (
+            <div className="border-b border-gray-200 bg-gray-50">
+              <div className="p-2 text-xs font-medium text-gray-500 uppercase tracking-wide">
+                Already included
+              </div>
+              {selectedValues.map((destination) => (
+                <div
+                  key={destination.code}
+                  className="flex items-center justify-between p-3 hover:bg-gray-100 border-b border-gray-100 last:border-b-0"
+                >
+                  <div className="flex-1">
+                    <div className="font-medium text-gray-700">{destination.name}</div>
+                    <div className="text-sm text-gray-500">
+                      {destination.type === "airport" && destination.city && `${destination.city}, `}
+                      {destination.country}
+                      {destination.type === "region" && " • Region"}
+                      {destination.type === "country" && " • Country"}
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => handleDestinationRemove(destination.code)}
+                    className="w-6 h-6 text-gray-400 hover:text-red-600 rounded flex items-center justify-center transition-colors"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
           {searchResults.map((destination) => (
             <div
               key={destination.code}
