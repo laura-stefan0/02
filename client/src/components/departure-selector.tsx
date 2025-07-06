@@ -302,45 +302,45 @@ export default function DepartureSelector({
 
   return (
     <div className="relative">
-      {/* Selected destinations badges */}
-      {selectedValues.length > 0 && (
-        <div className="flex flex-wrap gap-2 mb-2">
-          {selectedValues.map((destination) => (
-            <Badge key={destination.code} variant="secondary" className="flex items-center gap-1">
-              {getDisplayName(destination)}
-              <button
-                onClick={() => handleDestinationRemove(destination.code)}
-                className="h-3 w-3 hover:text-red-600"
-              >
-                <X className="h-3 w-3" />
-              </button>
-            </Badge>
-          ))}
-        </div>
-      )}
-
       <div className="relative">
-        <Input
-          ref={inputRef}
-          value={getDisplayValue()}
-          placeholder={placeholder}
-          onChange={handleInputChange}
-          onClick={handleInputClick}
-          onFocus={handleInputClick}
-          className={cn(
-            "w-full h-12 pl-10 pr-10",
-            !getDisplayValue() && !selectedValues.length && "text-muted-foreground"
+        <div className="relative flex items-center min-h-[48px] border border-input rounded-md bg-background px-3 py-2">
+          <MapPin className="h-4 w-4 text-gray-400 mr-2 flex-shrink-0" />
+          
+          {/* Selected destinations as inline badges */}
+          <div className="flex flex-wrap gap-1 mr-2">
+            {selectedValues.map((destination) => (
+              <Badge key={destination.code} variant="secondary" className="flex items-center gap-1 text-xs">
+                {getDisplayName(destination)}
+                <button
+                  onClick={() => handleDestinationRemove(destination.code)}
+                  className="h-3 w-3 hover:text-red-600"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </Badge>
+            ))}
+          </div>
+
+          {/* Search input */}
+          <input
+            ref={inputRef}
+            value={getDisplayValue()}
+            placeholder={selectedValues.length > 0 ? "Add another departure" : placeholder}
+            onChange={handleInputChange}
+            onClick={handleInputClick}
+            onFocus={handleInputClick}
+            className="flex-1 bg-transparent outline-none placeholder:text-muted-foreground"
+          />
+          
+          {(selectedValues.length > 0 || searchTerm) && (
+            <button
+              onClick={handleClear}
+              className="h-4 w-4 text-gray-400 hover:text-gray-600 flex-shrink-0 ml-2"
+            >
+              <X className="h-4 w-4" />
+            </button>
           )}
-        />
-        <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-        {(selectedValues.length > 0 || searchTerm) && (
-          <button
-            onClick={handleClear}
-            className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        )}
+        </div>
       </div>
 
       {/* Results dropdown - only show when typing */}
