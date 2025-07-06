@@ -100,7 +100,7 @@ export default function DestinationSelector({
   
   // Filter destinations based on search term
   const filteredDestinations = allDestinations.filter(dest => {
-    if (!searchTerm) return !isFromField; // Show popular destinations for "To", nothing for "From"
+    if (!searchTerm) return false; // Don't show anything when no search term
     
     const search = searchTerm.toLowerCase();
     return (
@@ -119,8 +119,6 @@ export default function DestinationSelector({
 
   // Combine filtered destinations with anywhere options
   const allResults = [...filteredDestinations, ...anywhereOptions];
-
-  const popularDestinations = allDestinations.filter(dest => dest.type === "airport").slice(0, 8);
 
   const handleDestinationSelect = (destination: { code: string; name: string }) => {
     onChange(destination.code);
@@ -155,19 +153,24 @@ export default function DestinationSelector({
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          className={cn(
-            "w-full justify-between text-left font-normal h-12",
-            !value && "text-muted-foreground"
-          )}
-        >
-          <div className="flex items-center gap-2">
-            <MapPin className="h-4 w-4 text-gray-400" />
-            {getDisplayValue()}
-          </div>
-          <ChevronDown className="h-4 w-4 text-gray-400" />
-        </Button>
+        <div className="relative">
+          <Input
+            value={value ? getDisplayValue() : ""}
+            placeholder={placeholder}
+            onClick={() => setIsOpen(true)}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              if (!isOpen) setIsOpen(true);
+            }}
+            className={cn(
+              "w-full h-12 pl-10 pr-10 cursor-pointer",
+              !value && "text-muted-foreground"
+            )}
+            readOnly={!!value}
+          />
+          <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+          <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+        </div>
       </PopoverTrigger>
       <PopoverContent className="w-96 p-0" align="start">
         {/* Search bar */}
@@ -175,11 +178,11 @@ export default function DestinationSelector({
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
             <Input
-              placeholder={isFromField ? "Search destinations..." : "Search destinations..."}
+              placeholder="Search destinations..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
-              autoFocus={isFromField}
+              autoFocus
             />
           </div>
         </div>
@@ -224,34 +227,10 @@ export default function DestinationSelector({
               )}
             </>
           ) : (
-            // Show popular destinations only for "To" field when no search term
-            <>
-              {!isFromField && (
-                <div className="p-3">
-                  <Label className="text-sm font-medium text-gray-700 mb-2 block">
-                    Popular destinations
-                  </Label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {popularDestinations.slice(0, 6).map((destination) => (
-                      <Button
-                        key={destination.code}
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDestinationSelect(destination)}
-                        className="text-xs justify-start"
-                      >
-                        {destination.city || destination.name}
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-              )}
-              {isFromField && (
-                <div className="p-3 text-center text-gray-500">
-                  Start typing to search for destinations...
-                </div>
-              )}
-            </>
+            // Show instruction to start typing
+            <div className="p-3 text-center text-gray-500">
+              Start typing to search for destinations...
+            </div>
           )}
         </div>
       </PopoverContent>
