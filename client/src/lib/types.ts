@@ -68,6 +68,17 @@ export interface RecentSearch {
   lastSearched: string;
 }
 
+export interface FlightDeal {
+  id: number;
+  title: string;
+  airline: string;
+  dealPrice: number;
+  originalPrice: number;
+  dealType: string;
+  validUntil: string;
+  imageUrl: string;
+}
+
 export interface LongLayoverFlight {
   id: number;
   route: string;

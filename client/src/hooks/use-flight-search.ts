@@ -50,3 +50,9 @@ export function useLongLayoverFlights() {
     queryKey: ["/api/long-layovers"],
   });
 }
+
+export function useLongLayoverFlights() {
+  return useQuery<LongLayoverFlight[]>({
+    queryKey: ["/api/long-layovers"],
+  });
+}

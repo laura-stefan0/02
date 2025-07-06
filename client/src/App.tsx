@@ -13,6 +13,8 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
+      <Route path="/deals" component={Deals} />
+      <Route path="/layover-explorer" component={LayoverExplorer} />
       <Route component={NotFound} />
     </Switch>
   );

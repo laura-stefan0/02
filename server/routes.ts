@@ -204,9 +204,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Remove deals endpoints - no longer needed
+  // Flight deals endpoint
+  app.get("/api/deals", async (req, res) => {
+    try {
+      const flightDeals = [
+        {
+          id: 1,
+          title: "Barcelona Adventure",
+          airline: "Vueling",
+          dealPrice: 8900, // €89 in cents
+          originalPrice: 12900, // €129 in cents
+          dealType: "percentage",
+          validUntil: "2025-02-15",
+          imageUrl: "https://images.unsplash.com/photo-1539037116277-4db20889f2d4"
+        },
+        {
+          id: 2,
+          title: "Paris Getaway",
+          airline: "Air France",
+          dealPrice: 15900, // €159 in cents
+          originalPrice: 22900, // €229 in cents
+          dealType: "best-deal",
+          validUntil: "2025-02-20",
+          imageUrl: "https://images.unsplash.com/photo-1502602898536-47ad22581b52"
+        },
+        {
+          id: 3,
+          title: "Amsterdam Discovery",
+          airline: "KLM",
+          dealPrice: 12900, // €129 in cents
+          originalPrice: 17900, // €179 in cents
+          dealType: "limited",
+          validUntil: "2025-02-10",
+          imageUrl: "https://images.unsplash.com/photo-1534351590666-13e3e96b5017"
+        }
+      ];
 
-  // Remove long layovers endpoint - no longer needed
+      res.json(flightDeals);
+    } catch (error) {
+      console.error('Error fetching flight deals:', error);
+      res.status(500).json({ error: 'Failed to fetch flight deals' });
+    }
+  });
 
   const httpServer = createServer(app);
   return httpServer;
