@@ -1,25 +1,28 @@
 
 import { useState, useRef, useEffect } from "react";
-import { MapPin, Globe, X } from "lucide-react";
+import { MapPin, Globe, X, Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 interface DestinationSelectorProps {
-  value?: string;
-  onChange: (value: string) => void;
+  value?: string | string[];
+  onChange: (value: string | string[]) => void;
   placeholder?: string;
   label?: string;
+  multiSelect?: boolean;
 }
 
 export default function DestinationSelector({ 
   value, 
   onChange, 
   placeholder = "Add destination",
-  label = "To"
+  label = "To",
+  multiSelect = false
 }: DestinationSelectorProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [showResults, setShowResults] = useState(false);
-  const [selectedValue, setSelectedValue] = useState("");
+  const [selectedValues, setSelectedValues] = useState<Array<{code: string; name: string; type: string; city?: string; country?: string}>>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
 
@@ -178,10 +181,47 @@ export default function DestinationSelector({
     { code: "western-europe", name: "Western Europe" },
     { code: "eastern-europe", name: "Eastern Europe" },
   ];
+
+  // Initialize selected values based on prop value
+  useEffect(() => {
+    if (value) {
+      if (Array.isArray(value)) {
+        const destinations = value.map(code => {
+          if (code === "ANYWHERE") {
+            return { code: "ANYWHERE", name: "Explore everywhere", type: "anywhere" };
+          }
+          if (code.startsWith("anywhere:")) {
+            const regionCode = code.split(":")[1];
+            const region = regions.find(r => r.code === regionCode);
+            return { code, name: region?.name || "Anywhere", type: "anywhere" };
+          }
+          const destination = allDestinations.find(d => d.code === code);
+          return destination || { code, name: code, type: "unknown" };
+        });
+        setSelectedValues(destinations);
+      } else {
+        if (value === "ANYWHERE") {
+          setSelectedValues([{ code: "ANYWHERE", name: "Explore everywhere", type: "anywhere" }]);
+        } else if (value.startsWith("anywhere:")) {
+          const regionCode = value.split(":")[1];
+          const region = regions.find(r => r.code === regionCode);
+          setSelectedValues([{ code: value, name: region?.name || "Anywhere", type: "anywhere" }]);
+        } else {
+          const destination = allDestinations.find(d => d.code === value);
+          if (destination) {
+            setSelectedValues([destination]);
+          }
+        }
+      }
+    } else {
+      setSelectedValues([]);
+    }
+  }, [value]);
   
-  // Filter destinations based on search term
+  // Filter destinations based on search term and exclude already selected
   const filteredDestinations = allDestinations.filter(dest => {
     if (!searchTerm) return false;
+    if (selectedValues.some(selected => selected.code === dest.code)) return false;
     
     const search = searchTerm.toLowerCase();
     return (
@@ -192,8 +232,8 @@ export default function DestinationSelector({
     );
   });
 
-  // Add "Anywhere" options when searching
-  const anywhereOptions = searchTerm ? [
+  // Add "Anywhere" options when searching (exclude if already selected)
+  const anywhereOptions = searchTerm && !selectedValues.some(s => s.code === "ANYWHERE") ? [
     { code: "anywhere:europe", name: "Europe", city: "", country: "", type: "anywhere" },
   ].filter(option => option.name.toLowerCase().includes(searchTerm.toLowerCase())) : [];
 
@@ -211,7 +251,7 @@ export default function DestinationSelector({
     return a.name.localeCompare(b.name);
   });
 
-  // Popular destinations to show when no search term
+  // Popular destinations to show when no search term (exclude selected)
   const popularDestinations = [
     { code: "CDG", name: "Paris", city: "Paris", country: "France", type: "airport" },
     { code: "LHR", name: "London", city: "London", country: "United Kingdom", type: "airport" },
@@ -219,77 +259,63 @@ export default function DestinationSelector({
     { code: "BCN", name: "Barcelona", city: "Barcelona", country: "Spain", type: "airport" },
     { code: "AMS", name: "Amsterdam", city: "Amsterdam", country: "Netherlands", type: "airport" },
     { code: "VIE", name: "Vienna", city: "Vienna", country: "Austria", type: "airport" },
-  ];
+  ].filter(dest => !selectedValues.some(selected => selected.code === dest.code));
 
   // Show popular destinations when no search term, otherwise show search results
   const searchResults = searchTerm ? [...anywhereOptions, ...sortedDestinations] : popularDestinations;
-  const allResults = searchResults;
 
-  const handleDestinationSelect = (destination: { code: string; name: string }) => {
-    const displayValue = destination.type === "airport" 
-      ? `${destination.city || destination.name} (${destination.code})`
-      : destination.name;
-    
-    setSelectedValue(displayValue);
+  const handleDestinationAdd = (destination: { code: string; name: string; type: string; city?: string; country?: string }) => {
+    if (multiSelect) {
+      const newSelectedValues = [...selectedValues, destination];
+      setSelectedValues(newSelectedValues);
+      onChange(newSelectedValues.map(d => d.code));
+    } else {
+      setSelectedValues([destination]);
+      onChange(destination.code);
+      setShowResults(false);
+    }
     setSearchTerm("");
-    setShowResults(false);
-    onChange(destination.code);
+  };
+
+  const handleDestinationRemove = (codeToRemove: string) => {
+    const newSelectedValues = selectedValues.filter(dest => dest.code !== codeToRemove);
+    setSelectedValues(newSelectedValues);
+    
+    if (multiSelect) {
+      onChange(newSelectedValues.map(d => d.code));
+    } else {
+      onChange(newSelectedValues.length > 0 ? newSelectedValues[0].code : "");
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
     setSearchTerm(newValue);
-    setShowResults(newValue.length > 0); // Only show results when typing
-    
-    // Clear selected value when user starts typing
-    if (selectedValue && newValue !== selectedValue) {
-      setSelectedValue("");
-    }
-    
-    if (newValue === "") {
-      setSelectedValue("");
-      onChange("");
-    }
+    setShowResults(newValue.length > 0);
   };
 
   const handleInputClick = () => {
-    // Only show "Explore everywhere" when clicking and no search term
     setShowResults(searchTerm.length === 0);
   };
 
   const handleClear = () => {
     setSearchTerm("");
-    setSelectedValue("");
+    setSelectedValues([]);
     setShowResults(false);
-    onChange("");
+    onChange(multiSelect ? [] : "");
     inputRef.current?.focus();
   };
 
   const getDisplayValue = () => {
-    // Always show the search term when user is typing
     if (searchTerm) return searchTerm;
-    // Show selected value when something is selected
-    if (selectedValue) return selectedValue;
-    
-    if (value) {
-      if (value.startsWith("anywhere:")) {
-        const regionCode = value.split(":")[1];
-        const region = regions.find(r => r.code === regionCode);
-        return region ? region.name : "Anywhere";
-      }
-      
-      const destination = allDestinations.find(d => d.code === value);
-      if (destination) {
-        if (destination.type === "airport") {
-          return `${destination.city || destination.name} (${destination.code})`;
-        }
-        return destination.name;
-      }
-      
-      return value;
-    }
-    
     return "";
+  };
+
+  const getDisplayName = (destination: { code: string; name: string; type: string; city?: string; country?: string }) => {
+    if (destination.type === "airport") {
+      return `${destination.city || destination.name} (${destination.code})`;
+    }
+    return destination.name;
   };
 
   // Handle clicks outside to close results
@@ -307,21 +333,38 @@ export default function DestinationSelector({
 
   return (
     <div className="relative">
+      {/* Selected destinations badges */}
+      {selectedValues.length > 0 && (
+        <div className="flex flex-wrap gap-2 mb-2">
+          {selectedValues.map((destination) => (
+            <Badge key={destination.code} variant="secondary" className="flex items-center gap-1">
+              {getDisplayName(destination)}
+              <button
+                onClick={() => handleDestinationRemove(destination.code)}
+                className="h-3 w-3 hover:text-red-600"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </Badge>
+          ))}
+        </div>
+      )}
+
       <div className="relative">
         <Input
           ref={inputRef}
           value={getDisplayValue()}
-          placeholder={placeholder}
+          placeholder={selectedValues.length > 0 ? "Add another destination" : placeholder}
           onChange={handleInputChange}
           onClick={handleInputClick}
           onFocus={handleInputClick}
           className={cn(
             "w-full h-12 pl-10 pr-10",
-            !getDisplayValue() && "text-muted-foreground"
+            !getDisplayValue() && !selectedValues.length && "text-muted-foreground"
           )}
         />
         <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-        {(selectedValue || searchTerm) && (
+        {(selectedValues.length > 0 || searchTerm) && (
           <button
             onClick={handleClear}
             className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 hover:text-gray-600"
@@ -337,24 +380,25 @@ export default function DestinationSelector({
           ref={resultsRef}
           className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-64 overflow-y-auto"
         >
-          {/* Show "Explore everywhere" only when no search term (initial click) */}
-          {!searchTerm && (
+          {/* Show "Explore everywhere" only when no search term and not already selected */}
+          {!searchTerm && !selectedValues.some(s => s.code === "ANYWHERE") && (
             <div className="p-3 border-b border-gray-200 bg-blue-50">
               <button 
-                onClick={() => handleDestinationSelect({ code: "ANYWHERE", name: "Explore everywhere", type: "anywhere" })}
-                className="flex items-center gap-2 text-blue-600 hover:text-blue-700 text-sm font-medium"
+                onClick={() => handleDestinationAdd({ code: "ANYWHERE", name: "Explore everywhere", type: "anywhere" })}
+                className="flex items-center gap-2 text-blue-600 hover:text-blue-700 text-sm font-medium w-full"
               >
                 <Globe className="h-4 w-4" />
                 Explore everywhere
+                <Plus className="h-4 w-4 ml-auto" />
               </button>
             </div>
           )}
 
-          {/* Show search results only when typing */}
-          {searchTerm && allResults.map((destination) => (
+          {/* Show search results */}
+          {searchResults.map((destination) => (
             <button
               key={destination.code}
-              onClick={() => handleDestinationSelect(destination)}
+              onClick={() => handleDestinationAdd(destination)}
               className="w-full text-left p-3 hover:bg-gray-50 flex items-center justify-between border-b border-gray-100 last:border-b-0"
             >
               <div>
@@ -367,9 +411,12 @@ export default function DestinationSelector({
                   {destination.type === "anywhere" && " • Anywhere"}
                 </div>
               </div>
-              <div className="text-sm font-mono text-gray-400">
-                {destination.type === "airport" ? destination.code : 
-                 destination.type === "anywhere" ? <Globe className="h-4 w-4" /> : ""}
+              <div className="flex items-center gap-2">
+                <div className="text-sm font-mono text-gray-400">
+                  {destination.type === "airport" ? destination.code : 
+                   destination.type === "anywhere" ? <Globe className="h-4 w-4" /> : ""}
+                </div>
+                <Plus className="h-4 w-4 text-blue-600" />
               </div>
             </button>
           ))}

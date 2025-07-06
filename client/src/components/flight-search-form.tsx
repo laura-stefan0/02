@@ -19,11 +19,17 @@ import DestinationSelector from "./destination-selector";
 import DepartureSelector from "./departure-selector";
 
 const formSchema = z.object({
-  fromAirport: z.string().min(1, "Please select a departure location"),
-  toAirport: z.string().min(1, "Please select a destination").refine(
-    (val) => val === "ANYWHERE" || val.length >= 1, 
-    "Please select a destination"
-  ),
+  fromAirport: z.union([
+    z.string().min(1, "Please select a departure location"),
+    z.array(z.string()).min(1, "Please select at least one departure location")
+  ]),
+  toAirport: z.union([
+    z.string().min(1, "Please select a destination").refine(
+      (val) => val === "ANYWHERE" || val.length >= 1, 
+      "Please select a destination"
+    ),
+    z.array(z.string()).min(1, "Please select at least one destination")
+  ]),
   departureDate: z.string().min(1, "Please select a departure date"),
   returnDate: z.string().optional(),
   passengers: z.number().min(1).max(9).default(1),
@@ -51,8 +57,8 @@ export default function FlightSearchForm({ onSearchComplete }: FlightSearchFormP
     mode: "onSubmit",
     reValidateMode: "onSubmit", // Only validate on submit
     defaultValues: {
-      fromAirport: "",
-      toAirport: "",
+      fromAirport: [],
+      toAirport: [],
       departureDate: "",
       returnDate: "",
       passengers: 1,
@@ -67,12 +73,16 @@ export default function FlightSearchForm({ onSearchComplete }: FlightSearchFormP
   });
 
   const onSubmit = (values: FormData) => {
+    // Handle both string and array values
+    const fromAirports = Array.isArray(values.fromAirport) ? values.fromAirport : [values.fromAirport];
+    const toAirports = Array.isArray(values.toAirport) ? values.toAirport : [values.toAirport];
+    
     // Allow "ANYWHERE" as a valid destination to support "Explore everywhere"
-    const isExploreEverywhere = values.toAirport === "ANYWHERE";
+    const isExploreEverywhere = toAirports.includes("ANYWHERE");
     
     const searchParams: FlightSearchParams = {
-      fromAirport: values.fromAirport.toUpperCase(),
-      toAirport: isExploreEverywhere ? "ANYWHERE" : values.toAirport.toUpperCase(),
+      fromAirport: fromAirports.map(airport => airport.toUpperCase()),
+      toAirport: isExploreEverywhere ? "ANYWHERE" : toAirports.map(airport => airport.toUpperCase()),
       departureDate: values.departureDate,
       returnDate: values.returnDate || undefined,
       passengers: values.passengers,
@@ -135,6 +145,7 @@ export default function FlightSearchForm({ onSearchComplete }: FlightSearchFormP
                               onChange={field.onChange}
                               placeholder="Add departure"
                               label="From"
+                              multiSelect={true}
                             />
                           </FormControl>
                           {form.formState.errors.fromAirport && form.formState.isSubmitted && (
@@ -156,6 +167,7 @@ export default function FlightSearchForm({ onSearchComplete }: FlightSearchFormP
                               onChange={field.onChange}
                               placeholder="Add destination"
                               label="To"
+                              multiSelect={true}
                             />
                           </FormControl>
                           {form.formState.errors.toAirport && form.formState.isSubmitted && (

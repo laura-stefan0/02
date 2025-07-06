@@ -15,8 +15,8 @@ export interface FlightSearchFilters {
 }
 
 export interface FlightSearchParams {
-  fromAirport: string;
-  toAirport: string;
+  fromAirport: string | string[];
+  toAirport: string | string[];
   departureDate: string;
   returnDate?: string;
   passengers: number;

@@ -1,25 +1,28 @@
 
 import { useState, useRef, useEffect } from "react";
-import { MapPin, X } from "lucide-react";
+import { MapPin, X, Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 interface DepartureSelectorProps {
-  value?: string;
-  onChange: (value: string) => void;
+  value?: string | string[];
+  onChange: (value: string | string[]) => void;
   placeholder?: string;
   label?: string;
+  multiSelect?: boolean;
 }
 
 export default function DepartureSelector({ 
   value, 
   onChange, 
   placeholder = "Add departure",
-  label = "From"
+  label = "From",
+  multiSelect = false
 }: DepartureSelectorProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [showResults, setShowResults] = useState(false);
-  const [selectedValue, setSelectedValue] = useState("");
+  const [selectedValues, setSelectedValues] = useState<Array<{code: string; name: string; type: string; city?: string; country?: string}>>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
 
@@ -169,10 +172,31 @@ export default function DepartureSelector({
     { code: "SCANDINAVIA", name: "Scandinavia", city: "", country: "", type: "region" },
     { code: "BALKANS", name: "Balkans", city: "", country: "", type: "region" },
   ];
+
+  // Initialize selected values based on prop value
+  useEffect(() => {
+    if (value) {
+      if (Array.isArray(value)) {
+        const destinations = value.map(code => {
+          const destination = allDestinations.find(d => d.code === code);
+          return destination || { code, name: code, type: "unknown" };
+        });
+        setSelectedValues(destinations);
+      } else {
+        const destination = allDestinations.find(d => d.code === value);
+        if (destination) {
+          setSelectedValues([destination]);
+        }
+      }
+    } else {
+      setSelectedValues([]);
+    }
+  }, [value]);
   
-  // Filter destinations based on search term
+  // Filter destinations based on search term and exclude already selected
   const filteredDestinations = allDestinations.filter(dest => {
     if (!searchTerm) return false;
+    if (selectedValues.some(selected => selected.code === dest.code)) return false;
     
     const search = searchTerm.toLowerCase();
     return (
@@ -197,65 +221,59 @@ export default function DepartureSelector({
     return a.name.localeCompare(b.name);
   });
 
-  const handleDestinationSelect = (destination: { code: string; name: string; type: string; city?: string }) => {
-    const displayValue = destination.type === "airport" 
-      ? `${destination.city || destination.name} (${destination.code})`
-      : destination.name;
-    
-    setSelectedValue(displayValue);
+  const handleDestinationAdd = (destination: { code: string; name: string; type: string; city?: string; country?: string }) => {
+    if (multiSelect) {
+      const newSelectedValues = [...selectedValues, destination];
+      setSelectedValues(newSelectedValues);
+      onChange(newSelectedValues.map(d => d.code));
+    } else {
+      setSelectedValues([destination]);
+      onChange(destination.code);
+      setShowResults(false);
+    }
     setSearchTerm("");
-    setShowResults(false);
-    onChange(destination.code);
+  };
+
+  const handleDestinationRemove = (codeToRemove: string) => {
+    const newSelectedValues = selectedValues.filter(dest => dest.code !== codeToRemove);
+    setSelectedValues(newSelectedValues);
+    
+    if (multiSelect) {
+      onChange(newSelectedValues.map(d => d.code));
+    } else {
+      onChange(newSelectedValues.length > 0 ? newSelectedValues[0].code : "");
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
     setSearchTerm(newValue);
-    setShowResults(newValue.length > 0); // Only show results when typing
-    
-    // Clear selected value when user starts typing
-    if (selectedValue && newValue !== selectedValue) {
-      setSelectedValue("");
-    }
-    
-    if (newValue === "") {
-      setSelectedValue("");
-      onChange("");
-    }
+    setShowResults(newValue.length > 0);
   };
 
   const handleInputClick = () => {
-    // Don't show anything on initial click for departure field
+    // Don't show anything on initial click for departure field unless searching
     setShowResults(false);
   };
 
   const handleClear = () => {
     setSearchTerm("");
-    setSelectedValue("");
+    setSelectedValues([]);
     setShowResults(false);
-    onChange("");
+    onChange(multiSelect ? [] : "");
     inputRef.current?.focus();
   };
 
   const getDisplayValue = () => {
-    // Always show the search term when user is typing
     if (searchTerm) return searchTerm;
-    // Show selected value when something is selected
-    if (selectedValue) return selectedValue;
-    
-    if (value) {
-      const destination = allDestinations.find(d => d.code === value);
-      if (destination) {
-        if (destination.type === "airport") {
-          return `${destination.city || destination.name} (${destination.code})`;
-        }
-        return destination.name;
-      }
-      
-      return value;
-    }
-    
     return "";
+  };
+
+  const getDisplayName = (destination: { code: string; name: string; type: string; city?: string; country?: string }) => {
+    if (destination.type === "airport") {
+      return `${destination.city || destination.name} (${destination.code})`;
+    }
+    return destination.name;
   };
 
   // Handle clicks outside to close results
@@ -273,21 +291,38 @@ export default function DepartureSelector({
 
   return (
     <div className="relative">
+      {/* Selected destinations badges */}
+      {selectedValues.length > 0 && (
+        <div className="flex flex-wrap gap-2 mb-2">
+          {selectedValues.map((destination) => (
+            <Badge key={destination.code} variant="secondary" className="flex items-center gap-1">
+              {getDisplayName(destination)}
+              <button
+                onClick={() => handleDestinationRemove(destination.code)}
+                className="h-3 w-3 hover:text-red-600"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </Badge>
+          ))}
+        </div>
+      )}
+
       <div className="relative">
         <Input
           ref={inputRef}
           value={getDisplayValue()}
-          placeholder={placeholder}
+          placeholder={selectedValues.length > 0 ? "Add another departure" : placeholder}
           onChange={handleInputChange}
           onClick={handleInputClick}
           onFocus={handleInputClick}
           className={cn(
             "w-full h-12 pl-10 pr-10",
-            !getDisplayValue() && "text-muted-foreground"
+            !getDisplayValue() && !selectedValues.length && "text-muted-foreground"
           )}
         />
         <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-        {(selectedValue || searchTerm) && (
+        {(selectedValues.length > 0 || searchTerm) && (
           <button
             onClick={handleClear}
             className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 hover:text-gray-600"
@@ -306,7 +341,7 @@ export default function DepartureSelector({
           {sortedDestinations.map((destination) => (
             <button
               key={destination.code}
-              onClick={() => handleDestinationSelect(destination)}
+              onClick={() => handleDestinationAdd(destination)}
               className="w-full text-left p-3 hover:bg-gray-50 flex items-center justify-between border-b border-gray-100 last:border-b-0"
             >
               <div>
@@ -318,8 +353,11 @@ export default function DepartureSelector({
                   {destination.type === "country" && " • Country"}
                 </div>
               </div>
-              <div className="text-sm font-mono text-gray-400">
-                {destination.type === "airport" ? destination.code : ""}
+              <div className="flex items-center gap-2">
+                <div className="text-sm font-mono text-gray-400">
+                  {destination.type === "airport" ? destination.code : ""}
+                </div>
+                <Plus className="h-4 w-4 text-blue-600" />
               </div>
             </button>
           ))}
