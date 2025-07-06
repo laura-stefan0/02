@@ -1,4 +1,5 @@
-import { Clock, Plane, Wifi, Briefcase, MapPin, Filter, ArrowUpDown, Calendar, TrendingDown, Star, Shield, CheckCircle } from "lucide-react";
+import { useState } from "react";
+import { Clock, Plane, Wifi, Briefcase, MapPin, Filter, ArrowUpDown, Calendar, TrendingDown, Star, Shield, CheckCircle, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -8,6 +9,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Slider } from "@/components/ui/slider";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
 import type { FlightResult } from "@/lib/types";
 
 interface FlightResultsProps {
@@ -20,6 +22,57 @@ interface FlightResultsProps {
 }
 
 export default function FlightResults({ results, isLoading }: FlightResultsProps) {
+  const [sortBy, setSortBy] = useState<'best' | 'cheapest' | 'fastest'>('best');
+  const { toast } = useToast();
+
+  // Sorting function
+  const sortFlights = (flights: FlightResult[], sortType: 'best' | 'cheapest' | 'fastest') => {
+    const sorted = [...flights];
+    
+    switch (sortType) {
+      case 'cheapest':
+        return sorted.sort((a, b) => a.price - b.price);
+      case 'fastest':
+        // Convert duration to minutes for comparison
+        const getDurationMinutes = (duration: string) => {
+          const matches = duration.match(/(\d+)h\s*(\d+)?m?/);
+          if (!matches) return 0;
+          const hours = parseInt(matches[1]) || 0;
+          const minutes = parseInt(matches[2]) || 0;
+          return hours * 60 + minutes;
+        };
+        return sorted.sort((a, b) => getDurationMinutes(a.duration) - getDurationMinutes(b.duration));
+      case 'best':
+      default:
+        // Best = combination of price, duration, and stops (lower is better)
+        return sorted.sort((a, b) => {
+          const scoreA = a.price / 100 + a.stops * 50 + getDurationMinutes(a.duration) / 10;
+          const scoreB = b.price / 100 + b.stops * 50 + getDurationMinutes(b.duration) / 10;
+          return scoreA - scoreB;
+        });
+    }
+  };
+
+  const handleSelectFlight = (flight: FlightResult) => {
+    // Open external booking link or show booking modal
+    toast({
+      title: "Flight Selected",
+      description: `Selected ${flight.airline} ${flight.flightNumber} for ${formatPrice(flight.price)}. Redirecting to booking...`,
+    });
+    
+    // Simulate external booking redirect
+    setTimeout(() => {
+      window.open(`https://www.google.com/flights#flt=${flight.fromAirport}.${flight.toAirport}.${new Date().toISOString().split('T')[0]};c:EUR;e:1;sd:1;t:f`, '_blank');
+    }, 1000);
+  };
+
+  const getDurationMinutes = (duration: string) => {
+    const matches = duration.match(/(\d+)h\s*(\d+)?m?/);
+    if (!matches) return 0;
+    const hours = parseInt(matches[1]) || 0;
+    const minutes = parseInt(matches[2]) || 0;
+    return hours * 60 + minutes;
+  };
   if (isLoading) {
     return (
       <section className="py-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -92,14 +145,10 @@ export default function FlightResults({ results, isLoading }: FlightResultsProps
             <h3 className="text-xl font-semibold text-gray-900">
               {results.count} flights • {results.search?.fromAirport} → {results.search?.toAirport}
             </h3>
-            <Button variant="outline" size="sm">
-              <Calendar className="h-4 w-4 mr-2" />
-              Change dates
-            </Button>
           </div>
 
           {/* Quick filter tabs - Skyscanner style */}
-          <Tabs defaultValue="best" className="w-full">
+          <Tabs value={sortBy} onValueChange={(value) => setSortBy(value as 'best' | 'cheapest' | 'fastest')} className="w-full">
             <TabsList className="grid w-full grid-cols-3 max-w-md">
               <TabsTrigger value="best" className="flex items-center">
                 <Star className="h-4 w-4 mr-1" />
@@ -208,7 +257,7 @@ export default function FlightResults({ results, isLoading }: FlightResultsProps
           {/* Main Results - Hybrid design */}
           <div className="flex-1">
             <div className="space-y-3">
-              {results.results.map((flight, index) => (
+              {sortFlights(results.results, sortBy).map((flight, index) => (
                 <Card key={flight.id} className="hover:shadow-md transition-all duration-200 border border-gray-200">
                   <CardContent className="p-4">
                     {/* Top section with airline and price */}
@@ -277,7 +326,11 @@ export default function FlightResults({ results, isLoading }: FlightResultsProps
 
                       {/* Book button */}
                       <div className="ml-6">
-                        <Button className="bg-brand-blue hover:bg-brand-blue-dark px-6">
+                        <Button 
+                          onClick={() => handleSelectFlight(flight)}
+                          className="bg-brand-blue hover:bg-brand-blue-dark px-6"
+                        >
+                          <ExternalLink className="h-4 w-4 mr-2" />
                           Select
                         </Button>
                       </div>
