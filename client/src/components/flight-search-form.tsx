@@ -53,10 +53,10 @@ export default function FlightSearchForm({ onSearchComplete }: FlightSearchFormP
       passengers: 1,
       filters: {
         priceRange: [0, 2000],
-        departureTime: [],
+        departureTime: ["morning", "afternoon", "evening"],
         maxDuration: [0, 24],
-        stops: [],
-        layoverDuration: [],
+        stops: ["direct", "1-stop", "2plus-stops"],
+        layoverDuration: ["none", "short", "8plus", "24plus", "48plus"],
       },
     },
   });
