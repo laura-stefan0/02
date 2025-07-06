@@ -1,8 +1,7 @@
 
 import { useState, useRef, useEffect } from "react";
-import { MapPin, Globe, X, Info } from "lucide-react";
+import { MapPin, Globe, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 
 interface DestinationSelectorProps {
@@ -334,41 +333,10 @@ export default function DestinationSelector({
           {/* Show "Explore everywhere" only when no search term (initial click) */}
           {!searchTerm && (
             <div className="p-3 border-b border-gray-200 bg-blue-50">
-              <Popover>
-                <PopoverTrigger asChild>
-                  <button className="flex items-center gap-2 text-blue-600 hover:text-blue-700 text-sm font-medium">
-                    <Globe className="h-4 w-4" />
-                    Explore everywhere
-                    <Info className="h-4 w-4" />
-                  </button>
-                </PopoverTrigger>
-                <PopoverContent className="w-80" align="start">
-                  <div className="space-y-3">
-                    <h4 className="font-semibold text-gray-900">Find destinations worldwide</h4>
-                    <p className="text-sm text-gray-600">
-                      Search for cities, airports, countries, or regions. You can also select "Anywhere" options to discover flights to any destination within Europe or worldwide.
-                    </p>
-                    <div className="grid grid-cols-2 gap-2 text-xs">
-                      <div className="flex items-center gap-1">
-                        <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                        <span>Regions</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                        <span>Countries</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-                        <span>Cities</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <div className="w-2 h-2 bg-gray-500 rounded-full"></div>
-                        <span>Airports</span>
-                      </div>
-                    </div>
-                  </div>
-                </PopoverContent>
-              </Popover>
+              <button className="flex items-center gap-2 text-blue-600 hover:text-blue-700 text-sm font-medium">
+                <Globe className="h-4 w-4" />
+                Explore everywhere
+              </button>
             </div>
           )}
 
