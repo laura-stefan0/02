@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertFlightSearchSchema, insertRecentSearchSchema } from "@shared/schema";
+import { amadeusService } from "./lib/amadeus";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Flight search
@@ -19,8 +20,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Create search record
       const search = await storage.createFlightSearch(normalizedSearchData);
       
-      // Get flight results
-      const results = await storage.searchFlights(searchData);
+      // Handle "ANYWHERE" destination by falling back to mock data
+      let results;
+      if (searchData.toAirport === "ANYWHERE") {
+        results = await storage.searchFlights(searchData);
+      } else {
+        try {
+          // Use Amadeus API for real flight search
+          const fromAirport = Array.isArray(searchData.fromAirport) ? searchData.fromAirport[0] : searchData.fromAirport;
+          const toAirport = Array.isArray(searchData.toAirport) ? searchData.toAirport[0] : searchData.toAirport;
+          
+          results = await amadeusService.searchFlights({
+            originLocationCode: fromAirport.toUpperCase(),
+            destinationLocationCode: toAirport.toUpperCase(),
+            departureDate: searchData.departureDate,
+            returnDate: searchData.returnDate || undefined,
+            adults: searchData.passengers,
+            max: 20
+          });
+        } catch (amadeusError) {
+          console.error("Amadeus API failed, falling back to mock data:", amadeusError);
+          // Fall back to mock data if Amadeus fails
+          results = await storage.searchFlights(searchData);
+        }
+      }
       
       // Add to recent searches
       await storage.addRecentSearch({
@@ -94,6 +117,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
           layoverAirport: "DXB",
           departureTime: "08:15",
           nextDeparture: "Tomorrow 08:15",
+
+
+  // Airport search using Amadeus
+  app.get("/api/airports/search", async (req, res) => {
+    try {
+      const { q } = req.query;
+      if (!q || typeof q !== 'string') {
+        return res.status(400).json({ message: "Search query is required" });
+      }
+      
+      const suggestions = await amadeusService.getAirportSuggestions(q);
+      res.json(suggestions);
+    } catch (error) {
+      console.error("Airport search error:", error);
+      res.status(500).json({ message: "Failed to search airports" });
+    }
+  });
+
           activities: [
             "Visit Burj Khalifa and Dubai Mall",
             "Explore Dubai Marina and beaches", 
