@@ -247,6 +247,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Long layovers endpoint
+  app.get("/api/long-layovers", async (req, res) => {
+    try {
+      const longLayoverFlights = [
+        {
+          id: 1,
+          route: "JFK → NRT → SYD",
+          layoverDuration: "14h 30m",
+          layoverCity: "Tokyo",
+          price: 85900, // $859 in cents
+          totalDuration: "22h 15m",
+          airline: "Japan Airlines",
+          explorationOpportunities: [
+            "Visit Senso-ji Temple",
+            "Explore Shibuya Crossing", 
+            "Try authentic ramen"
+          ]
+        },
+        {
+          id: 2,
+          route: "LAX → CDG → CAI",
+          layoverDuration: "16h 45m",
+          layoverCity: "Paris",
+          price: 92400, // $924 in cents
+          totalDuration: "18h 30m",
+          airline: "Air France",
+          explorationOpportunities: [
+            "See the Eiffel Tower",
+            "Visit the Louvre Museum",
+            "Stroll along the Seine"
+          ]
+        },
+        {
+          id: 3,
+          route: "LHR → DXB → BKK",
+          layoverDuration: "12h 20m",
+          layoverCity: "Dubai",
+          price: 78500, // $785 in cents
+          totalDuration: "15h 45m",
+          airline: "Emirates",
+          explorationOpportunities: [
+            "Visit Burj Khalifa",
+            "Shop at Dubai Mall",
+            "Desert safari experience"
+          ]
+        }
+      ];
+
+      res.json(longLayoverFlights);
+    } catch (error) {
+      console.error('Error fetching long layover flights:', error);
+      res.status(500).json({ error: 'Failed to fetch long layover flights' });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
