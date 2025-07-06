@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Calendar, Plane, PlaneLanding, PlaneTakeoff, Settings, Globe, CalendarDays } from "lucide-react";
+import { Calendar, Plane, PlaneLanding, PlaneTakeoff, Settings, Globe, CalendarDays, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,8 +11,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useFlightSearch } from "@/hooks/use-flight-search";
 import type { FlightSearchParams } from "@/lib/types";
+import DepartureDateSelector from "./departure-date-selector";
+import DestinationSelector from "./destination-selector";
 
 const formSchema = z.object({
   fromAirport: z.string().min(3, "Please enter departure airport"),
@@ -80,15 +83,7 @@ export default function FlightSearchForm({ onSearchComplete }: FlightSearchFormP
     });
   };
 
-  const setAnytime = (field: "departureDate" | "returnDate") => {
-    const today = new Date();
-    const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, today.getDate());
-    form.setValue(field, nextMonth.toISOString().split('T')[0]);
-  };
 
-  const setAnywhere = () => {
-    form.setValue("toAirport", "ANY");
-  };
 
   return (
     <div className="relative">
@@ -126,14 +121,12 @@ export default function FlightSearchForm({ onSearchComplete }: FlightSearchFormP
                         <FormItem>
                           <FormLabel>From</FormLabel>
                           <FormControl>
-                            <div className="relative">
-                              <PlaneTakeoff className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                              <Input 
-                                placeholder="Venice (VCE)" 
-                                className="pl-10" 
-                                {...field} 
-                              />
-                            </div>
+                            <DestinationSelector
+                              value={field.value}
+                              onChange={field.onChange}
+                              placeholder="Venice (VCE)"
+                              label="From"
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -147,23 +140,12 @@ export default function FlightSearchForm({ onSearchComplete }: FlightSearchFormP
                         <FormItem>
                           <FormLabel>To</FormLabel>
                           <FormControl>
-                            <div className="relative">
-                              <PlaneLanding className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                              <Input 
-                                placeholder="Destination or Anywhere" 
-                                className="pl-10 pr-20" 
-                                {...field} 
-                              />
-                              <Button 
-                                type="button" 
-                                variant="ghost" 
-                                size="sm" 
-                                onClick={setAnywhere}
-                                className="absolute right-1 top-1/2 transform -translate-y-1/2 text-xs text-brand-blue hover:text-brand-blue-dark h-6 px-2"
-                              >
-                                Anywhere
-                              </Button>
-                            </div>
+                            <DestinationSelector
+                              value={field.value}
+                              onChange={field.onChange}
+                              placeholder="Add destination"
+                              label="To"
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -177,23 +159,11 @@ export default function FlightSearchForm({ onSearchComplete }: FlightSearchFormP
                         <FormItem>
                           <FormLabel>Departure</FormLabel>
                           <FormControl>
-                            <div className="relative">
-                              <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                              <Input 
-                                type="date" 
-                                className="pl-10 pr-20" 
-                                {...field} 
-                              />
-                              <Button 
-                                type="button" 
-                                variant="ghost" 
-                                size="sm" 
-                                onClick={() => setAnytime("departureDate")}
-                                className="absolute right-1 top-1/2 transform -translate-y-1/2 text-xs text-brand-blue hover:text-brand-blue-dark h-6 px-2"
-                              >
-                                Anytime
-                              </Button>
-                            </div>
+                            <DepartureDateSelector
+                              value={field.value}
+                              onChange={field.onChange}
+                              placeholder="Add date"
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -207,23 +177,11 @@ export default function FlightSearchForm({ onSearchComplete }: FlightSearchFormP
                         <FormItem>
                           <FormLabel>Return (Optional)</FormLabel>
                           <FormControl>
-                            <div className="relative">
-                              <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                              <Input 
-                                type="date" 
-                                className="pl-10 pr-20" 
-                                {...field} 
-                              />
-                              <Button 
-                                type="button" 
-                                variant="ghost" 
-                                size="sm" 
-                                onClick={() => setAnytime("returnDate")}
-                                className="absolute right-1 top-1/2 transform -translate-y-1/2 text-xs text-brand-blue hover:text-brand-blue-dark h-6 px-2"
-                              >
-                                Anytime
-                              </Button>
-                            </div>
+                            <DepartureDateSelector
+                              value={field.value || ""}
+                              onChange={field.onChange}
+                              placeholder="Add return date"
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
