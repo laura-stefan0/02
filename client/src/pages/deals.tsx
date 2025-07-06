@@ -71,22 +71,22 @@ export default function Deals() {
 
   return (
     <div className="py-12">
-      {/* Header Section - Separate div for title, subtitle, and airport selection */}
+      {/* Header Section - Title, subtitle, and airport selection always visible */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16">
-        {showAirportSelector ? (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Left Column - Title and Subtitle */}
-            <div className="flex flex-col justify-center">
-              <h1 className="text-4xl font-bold text-gray-900 mb-4">
-                Featured Deals {selectedAirport ? `from ${selectedAirport}` : 'from Your Area'}
-              </h1>
-              <p className="text-xl text-gray-600">
-                Discover amazing flight deals departing from your closest airport
-              </p>
-            </div>
-            
-            {/* Right Column - Airport Selector */}
-            <div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Left Column - Title and Subtitle */}
+          <div className="flex flex-col justify-center">
+            <h1 className="text-4xl font-bold text-gray-900 mb-4">
+              Featured Deals {selectedAirport ? `from ${selectedAirport}` : 'from Your Area'}
+            </h1>
+            <p className="text-xl text-gray-600">
+              Discover amazing flight deals departing from your closest airport
+            </p>
+          </div>
+          
+          {/* Right Column - Airport Controls */}
+          <div className="flex flex-col justify-center">
+            {showAirportSelector ? (
               <AirportSelector
                 selectedAirport={selectedAirport}
                 onAirportChange={handleAirportChange}
@@ -94,46 +94,29 @@ export default function Deals() {
                 subtitle="We'll show you the best deals from your chosen airport"
                 onBack={() => setShowAirportSelector(false)}
               />
-            </div>
+            ) : selectedAirport ? (
+              <div className="text-center lg:text-left">
+                <Button
+                  onClick={() => setShowAirportSelector(true)}
+                  variant="outline"
+                  className="mb-2"
+                >
+                  <MapPin className="h-4 w-4 mr-2" />
+                  Change Departure Airport
+                </Button>
+                <p className="text-sm text-gray-600">
+                  Currently showing deals from {selectedAirport}
+                </p>
+              </div>
+            ) : null}
           </div>
-        ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Left Column - Title and Subtitle */}
-            <div className="flex flex-col justify-center">
-              <h1 className="text-4xl font-bold text-gray-900 mb-4">
-                Featured Deals {selectedAirport ? `from ${selectedAirport}` : 'from Your Area'}
-              </h1>
-              <p className="text-xl text-gray-600">
-                Discover amazing flight deals departing from your closest airport
-              </p>
-            </div>
-            
-            {/* Right Column - Change Airport Button */}
-            <div className="flex flex-col justify-center">
-              {selectedAirport && (
-                <div className="text-center lg:text-left">
-                  <Button
-                    onClick={() => setShowAirportSelector(true)}
-                    variant="outline"
-                    className="mb-2"
-                  >
-                    <MapPin className="h-4 w-4 mr-2" />
-                    Change Departure Airport
-                  </Button>
-                  <p className="text-sm text-gray-600">
-                    Currently showing deals from {selectedAirport}
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
+        </div>
       </div>
 
-      {/* Content Section - Separate div for cards and other content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Deals Section */}
-        {!showAirportSelector && selectedAirport && (
+      {/* Cards Section - Separate div for all cards content */}
+      {!showAirportSelector && selectedAirport && (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Deals Cards */}
           <div className="mb-24">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {deals?.map((deal) => (
@@ -172,10 +155,8 @@ export default function Deals() {
               ))}
             </div>
           </div>
-        )}
 
-        {/* Airport Information Section */}
-        {!showAirportSelector && selectedAirport && (
+          {/* Airport Information Cards */}
           <div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <Card>
@@ -209,8 +190,8 @@ export default function Deals() {
               </Card>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -51,22 +51,22 @@ export default function LayoverExplorer() {
 
   return (
     <div className="py-12">
-      {/* Header Section - Separate div for title, subtitle, and airport selection */}
+      {/* Header Section - Title, subtitle, and airport selection always visible */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16">
-        {showAirportSelector ? (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Left Column - Title and Subtitle */}
-            <div className="flex flex-col justify-center">
-              <h1 className="text-4xl font-bold text-gray-900 mb-4">
-                Long Layover Explorer {selectedAirport ? `from ${selectedAirport}` : ''}
-              </h1>
-              <p className="text-xl text-gray-600">
-                Turn your layovers into mini-adventures. Discover flights with extended stopovers perfect for exploring new cities.
-              </p>
-            </div>
-            
-            {/* Right Column - Airport Selector */}
-            <div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Left Column - Title and Subtitle */}
+          <div className="flex flex-col justify-center">
+            <h1 className="text-4xl font-bold text-gray-900 mb-4">
+              Long Layover Explorer {selectedAirport ? `from ${selectedAirport}` : ''}
+            </h1>
+            <p className="text-xl text-gray-600">
+              Turn your layovers into mini-adventures. Discover flights with extended stopovers perfect for exploring new cities.
+            </p>
+          </div>
+          
+          {/* Right Column - Airport Controls */}
+          <div className="flex flex-col justify-center">
+            {showAirportSelector ? (
               <AirportSelector
                 selectedAirport={selectedAirport}
                 onAirportChange={handleAirportChange}
@@ -74,46 +74,29 @@ export default function LayoverExplorer() {
                 subtitle="We'll find long layover flights from your chosen airport"
                 onBack={() => setShowAirportSelector(false)}
               />
-            </div>
+            ) : selectedAirport ? (
+              <div className="text-center lg:text-left">
+                <Button
+                  onClick={() => setShowAirportSelector(true)}
+                  variant="outline"
+                  className="mb-2"
+                >
+                  <MapPin className="h-4 w-4 mr-2" />
+                  Change Departure Airport
+                </Button>
+                <p className="text-sm text-gray-600">
+                  Currently showing layover flights from {selectedAirport}
+                </p>
+              </div>
+            ) : null}
           </div>
-        ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Left Column - Title and Subtitle */}
-            <div className="flex flex-col justify-center">
-              <h1 className="text-4xl font-bold text-gray-900 mb-4">
-                Long Layover Explorer {selectedAirport ? `from ${selectedAirport}` : ''}
-              </h1>
-              <p className="text-xl text-gray-600">
-                Turn your layovers into mini-adventures. Discover flights with extended stopovers perfect for exploring new cities.
-              </p>
-            </div>
-            
-            {/* Right Column - Change Airport Button */}
-            <div className="flex flex-col justify-center">
-              {selectedAirport && (
-                <div className="text-center lg:text-left">
-                  <Button
-                    onClick={() => setShowAirportSelector(true)}
-                    variant="outline"
-                    className="mb-2"
-                  >
-                    <MapPin className="h-4 w-4 mr-2" />
-                    Change Departure Airport
-                  </Button>
-                  <p className="text-sm text-gray-600">
-                    Currently showing layover flights from {selectedAirport}
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
+        </div>
       </div>
 
-      {/* Content Section - Separate div for cards and other content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Layover Flights Section */}
-        {!showAirportSelector && selectedAirport && (
+      {/* Cards Section - Separate div for all cards content */}
+      {!showAirportSelector && selectedAirport && (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Layover Flight Cards */}
           <div className="mb-24">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {layoverFlights?.map((flight) => (
@@ -172,69 +155,66 @@ export default function LayoverExplorer() {
               ))}
             </div>
           </div>
-        )}
 
-        {/* Call to Action */}
-        {!showAirportSelector && selectedAirport && (
-        <div className="text-center mt-12">
-          <Card className="bg-gradient-to-br from-brand-blue to-brand-blue-dark text-white">
-            <CardContent className="p-8">
-              <h3 className="text-2xl font-bold mb-4">Ready for Your Next Adventure?</h3>
-              <p className="text-blue-100 mb-6 max-w-2xl mx-auto">
-                Discover more long layover opportunities and turn your travel time into exploration time. 
-                Every stop is a chance to see something new!
-              </p>
-              <Button size="lg" variant="secondary" className="font-semibold">
-                Find More Long Layover Flights
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-
-        )}
-
-        {/* Tips Section */}
-        <div className="mt-16">
-          <h2 className="text-2xl font-bold text-gray-900 mb-8 text-center">Long Layover Tips</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card>
-              <CardContent className="p-6">
-                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
-                  <Clock className="h-6 w-6 text-brand-blue" />
-                </div>
-                <h3 className="font-semibold text-gray-900 mb-3">Plan Your Time</h3>
-                <p className="text-gray-600 text-sm">
-                  Allow at least 3 hours total for airport procedures. Use the remaining time to explore the city or relax at the airport.
+          {/* Call to Action */}
+          <div className="text-center mt-12">
+            <Card className="bg-gradient-to-br from-brand-blue to-brand-blue-dark text-white">
+              <CardContent className="p-8">
+                <h3 className="text-2xl font-bold mb-4">Ready for Your Next Adventure?</h3>
+                <p className="text-blue-100 mb-6 max-w-2xl mx-auto">
+                  Discover more long layover opportunities and turn your travel time into exploration time. 
+                  Every stop is a chance to see something new!
                 </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-6">
-                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
-                  <MapPin className="h-6 w-6 text-green-600" />
-                </div>
-                <h3 className="font-semibold text-gray-900 mb-3">Check Visa Requirements</h3>
-                <p className="text-gray-600 text-sm">
-                  Some countries allow transit passengers to leave the airport without a visa. Always verify requirements before traveling.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-6">
-                <div className="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center mb-4">
-                  <CheckCircle className="h-6 w-6 text-amber-600" />
-                </div>
-                <h3 className="font-semibold text-gray-900 mb-3">Pack Smart</h3>
-                <p className="text-gray-600 text-sm">
-                  Keep essentials in your carry-on and dress in layers. Consider leaving heavy luggage at the airport if storage is available.
-                </p>
+                <Button size="lg" variant="secondary" className="font-semibold">
+                  Find More Long Layover Flights
+                </Button>
               </CardContent>
             </Card>
           </div>
+
+          {/* Tips Section */}
+          <div className="mt-16">
+            <h2 className="text-2xl font-bold text-gray-900 mb-8 text-center">Long Layover Tips</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Card>
+                <CardContent className="p-6">
+                  <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+                    <Clock className="h-6 w-6 text-brand-blue" />
+                  </div>
+                  <h3 className="font-semibold text-gray-900 mb-3">Plan Your Time</h3>
+                  <p className="text-gray-600 text-sm">
+                    Allow at least 3 hours total for airport procedures. Use the remaining time to explore the city or relax at the airport.
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="p-6">
+                  <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
+                    <MapPin className="h-6 w-6 text-green-600" />
+                  </div>
+                  <h3 className="font-semibold text-gray-900 mb-3">Check Visa Requirements</h3>
+                  <p className="text-gray-600 text-sm">
+                    Some countries allow transit passengers to leave the airport without a visa. Always verify requirements before traveling.
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="p-6">
+                  <div className="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center mb-4">
+                    <CheckCircle className="h-6 w-6 text-amber-600" />
+                  </div>
+                  <h3 className="font-semibold text-gray-900 mb-3">Pack Smart</h3>
+                  <p className="text-gray-600 text-sm">
+                    Keep essentials in your carry-on and dress in layers. Consider leaving heavy luggage at the airport if storage is available.
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
