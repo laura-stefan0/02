@@ -89,7 +89,7 @@ export default function AirportSelector({ selectedAirport, onAirportChange, titl
         {/* Geolocation Option */}
         {!showManualSelection && (
           <div className="space-y-4">
-            {nearestAirport ? (
+            {nearestAirport && !selectedAirport && (
               <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center">
@@ -111,7 +111,9 @@ export default function AirportSelector({ selectedAirport, onAirportChange, titl
                   </Button>
                 </div>
               </div>
-            ) : (
+            )}
+
+            {!nearestAirport && !selectedAirport && (
               <div className="text-center">
                 <Button
                   onClick={handleGetLocation}
@@ -132,23 +134,6 @@ export default function AirportSelector({ selectedAirport, onAirportChange, titl
                 </Button>
               </div>
             )}
-
-            {/* Default Airports */}
-            <div>
-              <p className="text-sm font-medium text-gray-700 mb-3">Or choose from nearby airports:</p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {defaultDepartureAirports.map((airport) => (
-                  <button
-                    key={airport.code}
-                    onClick={() => onAirportChange(airport)}
-                    className="p-3 border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 text-left transition-colors"
-                  >
-                    <p className="font-medium text-gray-900">{airport.name}</p>
-                    <p className="text-sm text-gray-600">{airport.city}, {airport.country}</p>
-                  </button>
-                ))}
-              </div>
-            </div>
 
             <div className="text-center">
               <Button
@@ -207,11 +192,14 @@ export default function AirportSelector({ selectedAirport, onAirportChange, titl
 
             <div className="text-center">
               <Button
-                onClick={() => setShowManualSelection(false)}
+                onClick={() => {
+                  setShowManualSelection(false);
+                  setSearchTerm("");
+                }}
                 variant="outline"
                 size="sm"
               >
-                Back to Quick Selection
+                Back
               </Button>
             </div>
           </div>
