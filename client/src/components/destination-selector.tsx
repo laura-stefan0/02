@@ -224,6 +224,16 @@ export default function DestinationSelector({
     return a.name.localeCompare(b.name);
   });
 
+  // Popular destinations to show when no search term
+  const popularDestinations = [
+    { code: "CDG", name: "Paris", city: "Paris", country: "France", type: "airport" },
+    { code: "LHR", name: "London", city: "London", country: "United Kingdom", type: "airport" },
+    { code: "FCO", name: "Rome", city: "Rome", country: "Italy", type: "airport" },
+    { code: "BCN", name: "Barcelona", city: "Barcelona", country: "Spain", type: "airport" },
+    { code: "AMS", name: "Amsterdam", city: "Amsterdam", country: "Netherlands", type: "airport" },
+    { code: "VIE", name: "Vienna", city: "Vienna", country: "Austria", type: "airport" },
+  ];
+
   // Show popular destinations when no search term, otherwise show search results
   const searchResults = searchTerm ? [...anywhereOptions, ...sortedDestinations] : popularDestinations;
   const allResults = searchResults;
