@@ -52,7 +52,7 @@ function App() {
               </div>
               
               <div className="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
-                <p className="font-mono">&copy; 2025 FlightsHacked. <span className="text-green-400">Flights, but HACKED</span></p>
+                <p>&copy; 2025 FlightFinder. Made with ❤️ for travelers worldwide.</p>
               </div>
             </div>
           </footer>
