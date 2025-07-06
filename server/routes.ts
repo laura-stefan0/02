@@ -26,7 +26,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       let results = [];
       let dataSource = 'sky-scrapper';
-      
+
       try {
         // Validate date format (must be YYYY-MM-DD)
         const departureDateRegex = /^\d{4}-\d{2}-\d{2}$/;
@@ -40,7 +40,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
 
         console.log('🚀 Attempting Sky Scrapper API call...');
-        
+
         // Try Sky Scrapper API first
         results = await skyScrapperService.searchFlights({
           originLocationCode: fromAirport,
@@ -50,16 +50,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
           adults: searchData.passengers || 1,
           max: 10
         });
-        
+
         console.log('✅ Successfully used REAL Sky Scrapper data!');
         console.log(`📈 Results count: ${results.length}`);
-        
+
       } catch (error) {
-        console.error("❌ Sky Scrapper API failed, falling back to mock data:", error);
+        console.error('❌ Sky Scrapper API error:', error);
+
+        if (error.message === 'API_BLOCKED_CAPTCHA') {
+          console.log('🚫 Sky Scrapper API is blocking requests with CAPTCHA');
+          console.log('💡 This is common with flight APIs to prevent scraping');
+        }
+
+        console.log('🎭 Falling back to mock data...');
+
         dataSource = 'mock';
-        // Fallback to mock data if API fails
-        results = generateMockFlightResults(fromAirport, toAirport, searchData.departureDate, searchData.returnDate);
-        console.log('🎭 Using MOCK data instead');
+        results = generateMockFlights(searchData);
       }
 
       // Add to recent searches
@@ -76,14 +82,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`📊 Data source: ${dataSource}`);
       console.log(`✈️ Sample flight: ${results[0]?.airline} ${results[0]?.flightNumber} - €${(results[0]?.price / 100).toFixed(2)}`);
       console.log(`🔢 Total results: ${results.length}`);
-      
+
       const response = {
         search,
         results,
         count: results.length,
         dataSource, // Include whether data came from 'sky-scrapper' or 'mock'
       };
-      
+
       res.json(response);
     } catch (error) {
       console.error("Flight search error:", error);
@@ -186,7 +192,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/airports/search", async (req, res) => {
     try {
       const { q } = req.query;
-      
+
       if (!q || typeof q !== 'string') {
         return res.status(400).json({ error: 'Search query required' });
       }
@@ -372,7 +378,7 @@ function generateMockFlightResults(fromAirport: string, toAirport: string, depar
     const arrHour = (depHour + duration) % 24;
     const arrMinute = depMinute + Math.floor(Math.random() * 60);
 
-    const stops = Math.floor(Math.random() * 3); // 0-2 stops
+    const stops = Math.floor(Math.random() * 3);
     const price = Math.floor(Math.random() * 1500) + 200; // $200-$1700
 
     let layoverAirport = null;
@@ -417,3 +423,48 @@ function generateMockFlightResults(fromAirport: string, toAirport: string, depar
   return results.sort((a, b) => a.price - b.price);
 }
 
+const generateMockFlights = (search: any) => {
+    console.log('🎭 Generating mock flights for:', search);
+
+    const mockFlights = [];
+    const airlines = ['Emirates', 'KLM', 'Lufthansa', 'Turkish Airlines', 'Air France', 'British Airways'];
+    const prices = [18900, 23450, 19800, 21200, 25600, 17800]; // in cents
+
+    for (let i = 0; i < 8; i++) {
+      const departureHour = 6 + Math.floor(Math.random() * 16);
+      const departureMinute = Math.floor(Math.random() * 6) * 10;
+      const duration = 120 + Math.floor(Math.random() * 300); // 2-7 hours in minutes
+
+      // Calculate arrival time properly
+      const totalMinutes = departureHour * 60 + departureMinute + duration;
+      const arrivalHour = Math.floor(totalMinutes / 60) % 24;
+      const arrivalMinute = totalMinutes % 60;
+
+      const stops = Math.floor(Math.random() * 3);
+      const layoverAirport = stops > 0 && Math.random() > 0.4 ? ['CDG', 'AMS', 'FRA', 'IST', 'DXB'][Math.floor(Math.random() * 5)] : null;
+
+      mockFlights.push({
+        id: i + 1,
+        airline: airlines[i % airlines.length],
+        flightNumber: `${airlines[i % airlines.length].substring(0, 2).toUpperCase()}${1000 + Math.floor(Math.random() * 8999)}`,
+        aircraftType: ['A320', 'B737', 'A350', 'B777', 'A330'][Math.floor(Math.random() * 5)],
+        fromAirport: search.fromAirport,
+        toAirport: search.toAirport,
+        departureTime: `${departureHour.toString().padStart(2, '0')}:${departureMinute.toString().padStart(2, '0')}`,
+        arrivalTime: `${arrivalHour.toString().padStart(2, '0')}:${arrivalMinute.toString().padStart(2, '0')}`,
+        duration: `${Math.floor(duration / 60)}h ${duration % 60}m`,
+        stops: stops,
+        layoverAirport: layoverAirport,
+        layoverDuration: stops > 0 ? `${1 + Math.floor(Math.random() * 4)}h ${Math.floor(Math.random() * 60)}m` : null,
+        price: prices[i % prices.length] + Math.floor(Math.random() * 5000),
+        currency: 'EUR',
+        isLongLayover: stops > 0 && Math.random() > 0.7,
+        amenities: ['WiFi', 'Meals included', '1 bag included', 'In-flight entertainment'].filter(() => Math.random() > 0.3)
+      });
+    }
+
+    console.log(`🎭 Generated ${mockFlights.length} mock flights`);
+    console.log(`💰 Sample flight: ${mockFlights[0]?.airline} ${mockFlights[0]?.flightNumber} - €${(mockFlights[0]?.price / 100).toFixed(2)}`);
+
+    return mockFlights;
+  };

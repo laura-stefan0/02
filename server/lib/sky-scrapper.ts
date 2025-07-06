@@ -142,6 +142,12 @@ export class SkyScrpperService {
   private transformFlightResults(data: any) {
     console.log('🔍 Raw Sky Scrapper response structure:', JSON.stringify(data, null, 2));
     
+    // Check if we got a CAPTCHA response
+    if (data && data.status === false && data.message && data.message.action === 'captcha') {
+      console.log('🤖 Sky Scrapper API returned CAPTCHA challenge - API is blocking automated requests');
+      throw new Error('API_BLOCKED_CAPTCHA');
+    }
+    
     if (!data || !data.data || (!data.data.flights && !data.data.itineraries)) {
       console.log('⚠️ No flights found in Sky Scrapper response');
       return [];
