@@ -41,9 +41,14 @@ export class SkyScrpperService {
         });
       }
 
-      const requestUrl = `${this.baseUrl}/flights/getFlightDetails`;
+      const requestUrl = `${this.baseUrl}/flights/searchFlights`;
       const requestParams = {
-        legs: JSON.stringify(legs),
+        originSkyId: origin,
+        destinationSkyId: destination,
+        originEntityId: origin,
+        destinationEntityId: destination,
+        date: params.departureDate,
+        returnDate: params.returnDate || undefined,
         adults: params.adults,
         currency: 'EUR',
         locale: 'en-US',
@@ -111,31 +116,38 @@ export class SkyScrpperService {
   }
 
   private convertAirportCode(code: string): string {
-    // Sky Scrapper uses different airport code format
+    // Sky Scrapper uses SkyScanner entity IDs
     // Map common codes to their Sky Scrapper equivalents
     const codeMap: { [key: string]: string } = {
-      'VCE': 'VENI', // Venice
-      'VIE': 'VIEN', // Vienna
-      'JFK': 'NYCA', // New York
-      'LAX': 'LAXA', // Los Angeles
-      'LHR': 'LOND', // London
-      'CDG': 'PARI', // Paris
-      'FRA': 'FRAN', // Frankfurt
-      'AMS': 'AMST', // Amsterdam
-      'BCN': 'BARC', // Barcelona
-      'FCO': 'ROME'  // Rome
+      'VCE': '95673431', // Venice Marco Polo
+      'VIE': '95673651', // Vienna International
+      'JFK': '95673506', // JFK New York
+      'LAX': '95673607', // Los Angeles International
+      'LHR': '95673502', // London Heathrow
+      'CDG': '95673383', // Paris Charles de Gaulle
+      'FRA': '95673424', // Frankfurt Airport
+      'AMS': '95673394', // Amsterdam Schiphol
+      'BCN': '95673484', // Barcelona El Prat
+      'FCO': '95673679', // Rome Fiumicino
+      'MXP': '95673556', // Milan Malpensa
+      'ZUR': '95673633', // Zurich Airport
+      'MUC': '95673566', // Munich Airport
+      'DXB': '95673394', // Dubai International
+      'DOH': '95673567'  // Doha Hamad International
     };
 
     return codeMap[code.toUpperCase()] || code.toUpperCase();
   }
 
   private transformFlightResults(data: any) {
-    if (!data || !data.data || !data.data.flights) {
+    console.log('🔍 Raw Sky Scrapper response structure:', JSON.stringify(data, null, 2));
+    
+    if (!data || !data.data || (!data.data.flights && !data.data.itineraries)) {
       console.log('⚠️ No flights found in Sky Scrapper response');
       return [];
     }
 
-    const flights = data.data.flights;
+    const flights = data.data.flights || data.data.itineraries || [];
     
     return flights.slice(0, 15).map((flight: any, index: number) => {
       // Extract flight details from Sky Scrapper response format
