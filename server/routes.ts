@@ -25,6 +25,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const toAirport = Array.isArray(searchData.toAirport) ? searchData.toAirport[0] : searchData.toAirport;
 
       let results = [];
+      let dataSource = 'amadeus';
+      
       try {
         // Validate date format for Amadeus API (must be YYYY-MM-DD)
         const departureDateRegex = /^\d{4}-\d{2}-\d{2}$/;
@@ -37,6 +39,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           throw new Error(`Invalid return date format: ${searchData.returnDate}. Expected YYYY-MM-DD`);
         }
 
+        console.log('🚀 Attempting Amadeus API call...');
+        
         // Try real Amadeus API first
         results = await amadeusService.searchFlights({
           originLocationCode: fromAirport,
@@ -46,10 +50,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
           adults: searchData.passengers || 1,
           max: 10
         });
+        
+        console.log('✅ Successfully used REAL Amadeus data!');
+        console.log(`📈 Results count: ${results.length}`);
+        
       } catch (error) {
-        console.error("Amadeus API failed, using mock data:", error);
+        console.error("❌ Amadeus API failed, falling back to mock data:", error);
+        dataSource = 'mock';
         // Fallback to mock data if API fails
         results = generateMockFlightResults(fromAirport, toAirport, searchData.departureDate, searchData.returnDate);
+        console.log('🎭 Using MOCK data instead');
       }
 
       // Add to recent searches
@@ -66,6 +76,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         search,
         results,
         count: results.length,
+        dataSource, // Include whether data came from 'amadeus' or 'mock'
       });
     } catch (error) {
       console.error("Flight search error:", error);

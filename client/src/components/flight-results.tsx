@@ -193,6 +193,14 @@ export default function FlightResults({ results, isLoading }: FlightResultsProps
             <h3 className="text-xl font-semibold text-gray-900">
               {results ? filterFlights(results.results).length : 0} of {results?.count || 0} flights • {results?.search?.fromAirport} → {results?.search?.toAirport}
             </h3>
+            {(results as any)?.dataSource && (
+              <Badge 
+                variant={((results as any).dataSource === 'amadeus') ? 'default' : 'secondary'}
+                className={((results as any).dataSource === 'amadeus') ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800'}
+              >
+                {((results as any).dataSource === 'amadeus') ? '✅ Real Data' : '🎭 Mock Data'}
+              </Badge>
+            )}
           </div>
 
           {/* Quick filter tabs - Skyscanner style */}

@@ -35,11 +35,22 @@ export class AmadeusService {
         searchParams.returnDate = params.returnDate;
       }
 
+      console.log('🔍 Amadeus API Request params:', searchParams);
+      
       const response = await this.amadeus.shopping.flightOffersSearch.get(searchParams);
-      return this.transformFlightResults(response.data);
+      
+      console.log('✅ Amadeus API Response received');
+      console.log('📊 Number of offers:', response.data?.length || 0);
+      console.log('🔄 First offer sample:', response.data?.[0] ? JSON.stringify(response.data[0], null, 2).substring(0, 500) + '...' : 'No data');
+      
+      const transformedResults = this.transformFlightResults(response.data);
+      console.log('🎯 Transformed results count:', transformedResults.length);
+      console.log('💰 First result price:', transformedResults[0]?.price);
+      
+      return transformedResults;
     } catch (error) {
-      console.error('Amadeus API error:', error);
-      console.error('Error details:', error.response?.data || error.message);
+      console.error('❌ Amadeus API error:', error);
+      console.error('🔍 Error details:', error.response?.data || error.message);
       throw new Error('Failed to search flights');
     }
   }
