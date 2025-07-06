@@ -130,7 +130,6 @@ export default function FlightSearchForm({ onSearchComplete }: FlightSearchFormP
                               label="From"
                             />
                           </FormControl>
-                          <FormMessage />
                         </FormItem>
                       )}
                     />
@@ -149,7 +148,6 @@ export default function FlightSearchForm({ onSearchComplete }: FlightSearchFormP
                               label="To"
                             />
                           </FormControl>
-                          <FormMessage />
                         </FormItem>
                       )}
                     />
@@ -167,7 +165,6 @@ export default function FlightSearchForm({ onSearchComplete }: FlightSearchFormP
                               placeholder="Add date"
                             />
                           </FormControl>
-                          <FormMessage />
                         </FormItem>
                       )}
                     />
@@ -185,7 +182,6 @@ export default function FlightSearchForm({ onSearchComplete }: FlightSearchFormP
                               placeholder="Add return date"
                             />
                           </FormControl>
-                          <FormMessage />
                         </FormItem>
                       )}
                     />

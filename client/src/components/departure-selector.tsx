@@ -213,6 +213,11 @@ export default function DepartureSelector({
     setSearchTerm(newValue);
     setShowResults(newValue.length > 0); // Only show results when typing
     
+    // Clear selected value when user starts typing
+    if (selectedValue && newValue !== selectedValue) {
+      setSelectedValue("");
+    }
+    
     if (newValue === "") {
       setSelectedValue("");
       onChange("");
@@ -233,8 +238,10 @@ export default function DepartureSelector({
   };
 
   const getDisplayValue = () => {
-    if (selectedValue) return selectedValue;
+    // Always show the search term when user is typing
     if (searchTerm) return searchTerm;
+    // Show selected value when something is selected
+    if (selectedValue) return selectedValue;
     
     if (value) {
       const destination = allDestinations.find(d => d.code === value);
