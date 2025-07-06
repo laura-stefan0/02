@@ -71,10 +71,10 @@ export default function Deals() {
 
   return (
     <div className="py-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header Section with Title and Airport Selector */}
+      {/* Header Section - Separate div for title, subtitle, and airport selection */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16">
         {showAirportSelector ? (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Left Column - Title and Subtitle */}
             <div className="flex flex-col justify-center">
               <h1 className="text-4xl font-bold text-gray-900 mb-4">
@@ -97,7 +97,7 @@ export default function Deals() {
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Left Column - Title and Subtitle */}
             <div className="flex flex-col justify-center">
               <h1 className="text-4xl font-bold text-gray-900 mb-4">
@@ -128,10 +128,13 @@ export default function Deals() {
             </div>
           </div>
         )}
+      </div>
 
+      {/* Content Section - Separate div for cards and other content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Deals Section */}
         {!showAirportSelector && selectedAirport && (
-          <div className="mt-16">
+          <div className="mb-24">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {deals?.map((deal) => (
                 <Card key={deal.id} className={`${getDealGradient(deal.dealType)} overflow-hidden`}>
@@ -173,37 +176,37 @@ export default function Deals() {
 
         {/* Airport Information Section */}
         {!showAirportSelector && selectedAirport && (
-          <div className="mt-24">
+          <div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <Card>
-            <CardContent className="p-6">
-              <h3 className="text-xl font-bold text-gray-900 mb-4">Venice Marco Polo Airport (VCE)</h3>
-              <p className="text-gray-600 mb-4">
-                Venice's main international airport, perfectly positioned for exploring Northern Italy and beyond.
-              </p>
-              <ul className="text-sm text-gray-600 space-y-2">
-                <li>• Direct flights to major European destinations</li>
-                <li>• Easy access to Venice city center via water bus</li>
-                <li>• Modern facilities and duty-free shopping</li>
-                <li>• Car rental and public transport connections</li>
-              </ul>
-            </CardContent>
-          </Card>
+              <Card>
+                <CardContent className="p-6">
+                  <h3 className="text-xl font-bold text-gray-900 mb-4">Venice Marco Polo Airport (VCE)</h3>
+                  <p className="text-gray-600 mb-4">
+                    Venice's main international airport, perfectly positioned for exploring Northern Italy and beyond.
+                  </p>
+                  <ul className="text-sm text-gray-600 space-y-2">
+                    <li>• Direct flights to major European destinations</li>
+                    <li>• Easy access to Venice city center via water bus</li>
+                    <li>• Modern facilities and duty-free shopping</li>
+                    <li>• Car rental and public transport connections</li>
+                  </ul>
+                </CardContent>
+              </Card>
 
-          <Card>
-            <CardContent className="p-6">
-              <h3 className="text-xl font-bold text-gray-900 mb-4">Treviso Airport (TSF)</h3>
-              <p className="text-gray-600 mb-4">
-                Budget-friendly airport serving the Veneto region with excellent low-cost carrier connections.
-              </p>
-              <ul className="text-sm text-gray-600 space-y-2">
-                <li>• Popular with budget airlines like Ryanair</li>
-                <li>• 40-minute bus ride to Venice</li>
-                <li>• Smaller, more manageable airport experience</li>
-                <li>• Great deals to European destinations</li>
-              </ul>
-            </CardContent>
-          </Card>
+              <Card>
+                <CardContent className="p-6">
+                  <h3 className="text-xl font-bold text-gray-900 mb-4">Treviso Airport (TSF)</h3>
+                  <p className="text-gray-600 mb-4">
+                    Budget-friendly airport serving the Veneto region with excellent low-cost carrier connections.
+                  </p>
+                  <ul className="text-sm text-gray-600 space-y-2">
+                    <li>• Popular with budget airlines like Ryanair</li>
+                    <li>• 40-minute bus ride to Venice</li>
+                    <li>• Smaller, more manageable airport experience</li>
+                    <li>• Great deals to European destinations</li>
+                  </ul>
+                </CardContent>
+              </Card>
             </div>
           </div>
         )}
