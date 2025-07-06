@@ -9,16 +9,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const searchData = insertFlightSearchSchema.parse(req.body);
       
+      // Convert arrays to strings for database storage
+      const normalizedSearchData = {
+        ...searchData,
+        fromAirport: Array.isArray(searchData.fromAirport) ? searchData.fromAirport.join(',') : searchData.fromAirport,
+        toAirport: Array.isArray(searchData.toAirport) ? searchData.toAirport.join(',') : searchData.toAirport,
+      };
+      
       // Create search record
-      const search = await storage.createFlightSearch(searchData);
+      const search = await storage.createFlightSearch(normalizedSearchData);
       
       // Get flight results
       const results = await storage.searchFlights(searchData);
       
       // Add to recent searches
       await storage.addRecentSearch({
-        fromAirport: searchData.fromAirport,
-        toAirport: searchData.toAirport,
+        fromAirport: normalizedSearchData.fromAirport,
+        toAirport: normalizedSearchData.toAirport,
         departureDate: searchData.departureDate,
         returnDate: searchData.returnDate || null,
         bestPrice: results.length > 0 ? Math.min(...results.map(r => r.price)) : null,

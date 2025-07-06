@@ -74,6 +74,9 @@ export const flightDeals = pgTable("flight_deals", {
 export const insertFlightSearchSchema = createInsertSchema(flightSearches).omit({
   id: true,
   createdAt: true,
+}).extend({
+  fromAirport: z.union([z.string(), z.array(z.string())]),
+  toAirport: z.union([z.string(), z.array(z.string())]),
 });
 
 export const insertFlightResultSchema = createInsertSchema(flightResults).omit({

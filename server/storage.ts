@@ -164,6 +164,14 @@ export class MemStorage implements IStorage {
   }
 
   async searchFlights(search: InsertFlightSearch): Promise<FlightResult[]> {
+    // Handle both string and array formats for airport codes
+    const fromAirports = Array.isArray(search.fromAirport) ? search.fromAirport : [search.fromAirport];
+    const toAirports = Array.isArray(search.toAirport) ? search.toAirport : [search.toAirport];
+    
+    // Use the first airport for display purposes in mock data
+    const primaryFromAirport = fromAirports[0];
+    const primaryToAirport = toAirports[0];
+    
     // Generate mock flight results based on search criteria
     const mockResults: FlightResult[] = [
       {
@@ -172,8 +180,8 @@ export class MemStorage implements IStorage {
         airline: "Lufthansa",
         flightNumber: "LH 1234",
         aircraftType: "Airbus A320",
-        fromAirport: search.fromAirport,
-        toAirport: search.toAirport,
+        fromAirport: primaryFromAirport,
+        toAirport: primaryToAirport,
         departureTime: "14:30",
         arrivalTime: "16:45",
         duration: "2h 15m",
@@ -191,8 +199,8 @@ export class MemStorage implements IStorage {
         airline: "Emirates",
         flightNumber: "EK 567 + EK 890",
         aircraftType: "Boeing 777 + A380",
-        fromAirport: search.fromAirport,
-        toAirport: search.toAirport,
+        fromAirport: primaryFromAirport,
+        toAirport: primaryToAirport,
         departureTime: "08:15",
         arrivalTime: "20:45",
         duration: "12h 30m",
@@ -210,8 +218,8 @@ export class MemStorage implements IStorage {
         airline: "KLM",
         flightNumber: "KL 456 + KL 789",
         aircraftType: "Boeing 737 + A330",
-        fromAirport: search.fromAirport,
-        toAirport: search.toAirport,
+        fromAirport: primaryFromAirport,
+        toAirport: primaryToAirport,
         departureTime: "10:30",
         arrivalTime: "18:45",
         duration: "8h 15m",
