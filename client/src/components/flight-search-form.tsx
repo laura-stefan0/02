@@ -99,9 +99,9 @@ export default function FlightSearchForm({ onSearchComplete }: FlightSearchFormP
         }}
       />
 
-      <div className="relative py-12 lg:py-20">
+      <div className="relative py-6 lg:py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
+          <div className="text-center mb-6">
             <h2 className="text-4xl lg:text-6xl font-bold text-white mb-4">
               Find Your Perfect Flight
             </h2>
