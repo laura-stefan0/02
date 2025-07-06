@@ -116,32 +116,95 @@ export default function DepartureDateSelector({ value, onChange, placeholder = "
           <ChevronDown className="h-4 w-4 text-gray-400" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-80 p-0" align="start">
-        <div className="border-b">
-          <RadioGroup 
-            value={mode} 
-            onValueChange={(value: DateSelectionMode) => setMode(value)}
-            className="p-3 space-y-1"
+      <PopoverContent className="w-96 p-0" align="start">
+        {/* Tab-style navigation */}
+        <div className="flex border-b">
+          <button
+            onClick={() => setMode("specific")}
+            className={cn(
+              "flex-1 px-3 py-2 text-sm font-medium border-b-2 transition-colors",
+              mode === "specific" 
+                ? "border-blue-500 text-blue-600 bg-blue-50" 
+                : "border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+            )}
           >
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="specific" id="specific" />
-              <Label htmlFor="specific" className="font-medium">Specific date</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="flexible" id="flexible" />
-              <Label htmlFor="flexible" className="font-medium">Flexible dates</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="period" id="period" />
-              <Label htmlFor="period" className="font-medium">Next period</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="anytime" id="anytime" />
-              <Label htmlFor="anytime" className="font-medium">Anytime</Label>
-            </div>
-          </RadioGroup>
+            Specific
+          </button>
+          <button
+            onClick={() => setMode("flexible")}
+            className={cn(
+              "flex-1 px-3 py-2 text-sm font-medium border-b-2 transition-colors",
+              mode === "flexible" 
+                ? "border-blue-500 text-blue-600 bg-blue-50" 
+                : "border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+            )}
+          >
+            Flexible
+          </button>
+          <button
+            onClick={() => setMode("period")}
+            className={cn(
+              "flex-1 px-3 py-2 text-sm font-medium border-b-2 transition-colors",
+              mode === "period" 
+                ? "border-blue-500 text-blue-600 bg-blue-50" 
+                : "border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+            )}
+          >
+            Period
+          </button>
+          <button
+            onClick={() => setMode("anytime")}
+            className={cn(
+              "flex-1 px-3 py-2 text-sm font-medium border-b-2 transition-colors",
+              mode === "anytime" 
+                ? "border-blue-500 text-blue-600 bg-blue-50" 
+                : "border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+            )}
+          >
+            Anytime
+          </button>
         </div>
 
+        {/* Quick access buttons always visible */}
+        <div className="p-3 border-b bg-gray-50">
+          <div className="grid grid-cols-2 gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handlePeriodSelect("7")}
+              className="text-xs"
+            >
+              Next 7 days
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handlePeriodSelect("30")}
+              className="text-xs"
+            >
+              Next month
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handlePeriodSelect("90")}
+              className="text-xs"
+            >
+              Next 3 months
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleAnytimeSelect}
+              className="text-xs"
+            >
+              <Infinity className="h-3 w-3 mr-1" />
+              Anytime
+            </Button>
+          </div>
+        </div>
+
+        {/* Main content area */}
         <div className="p-0">
           {mode === "specific" && (
             <div className="p-3">
@@ -170,29 +233,52 @@ export default function DepartureDateSelector({ value, onChange, placeholder = "
           {mode === "period" && (
             <div className="p-4 space-y-4">
               <Label className="text-sm font-medium text-gray-700">
-                Select time period
+                Select custom time period
               </Label>
-              <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="7">Next 7 days</SelectItem>
-                  <SelectItem value="14">Next 2 weeks</SelectItem>
-                  <SelectItem value="30">Next 30 days</SelectItem>
-                  <SelectItem value="60">Next 2 months</SelectItem>
-                  <SelectItem value="90">Next 3 months</SelectItem>
-                  <SelectItem value="180">Next 6 months</SelectItem>
-                  <SelectItem value="365">Next year</SelectItem>
-                </SelectContent>
-              </Select>
-              <Button 
-                onClick={() => handlePeriodSelect(selectedPeriod)}
-                className="w-full"
-              >
-                <Clock className="h-4 w-4 mr-2" />
-                Select Next {selectedPeriod} Days
-              </Button>
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  variant={selectedPeriod === "7" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => handlePeriodSelect("7")}
+                >
+                  7 days
+                </Button>
+                <Button
+                  variant={selectedPeriod === "14" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => handlePeriodSelect("14")}
+                >
+                  2 weeks
+                </Button>
+                <Button
+                  variant={selectedPeriod === "30" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => handlePeriodSelect("30")}
+                >
+                  1 month
+                </Button>
+                <Button
+                  variant={selectedPeriod === "60" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => handlePeriodSelect("60")}
+                >
+                  2 months
+                </Button>
+                <Button
+                  variant={selectedPeriod === "90" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => handlePeriodSelect("90")}
+                >
+                  3 months
+                </Button>
+                <Button
+                  variant={selectedPeriod === "180" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => handlePeriodSelect("180")}
+                >
+                  6 months
+                </Button>
+              </div>
             </div>
           )}
 
