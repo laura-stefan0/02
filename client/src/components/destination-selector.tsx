@@ -198,18 +198,6 @@ export default function DestinationSelector({
     { code: "anywhere:europe", name: "Europe", city: "", country: "", type: "anywhere" },
   ].filter(option => option.name.toLowerCase().includes(searchTerm.toLowerCase())) : [];
 
-  // Popular destinations to show when no search term
-  const popularDestinations = [
-    { code: "CDG", name: "Paris Charles de Gaulle", city: "Paris", country: "France", type: "airport" },
-    { code: "LHR", name: "London Heathrow", city: "London", country: "United Kingdom", type: "airport" },
-    { code: "BCN", name: "Barcelona", city: "Barcelona", country: "Spain", type: "airport" },
-    { code: "AMS", name: "Amsterdam", city: "Amsterdam", country: "Netherlands", type: "airport" },
-    { code: "BER", name: "Berlin Brandenburg", city: "Berlin", country: "Germany", type: "airport" },
-    { code: "FCO", name: "Rome Fiumicino", city: "Rome", country: "Italy", type: "airport" },
-    { code: "EUROPE", name: "Europe", city: "", country: "", type: "region" },
-    { code: "ASIA", name: "Asia", city: "", country: "", type: "region" },
-  ];
-
   // Sort filtered destinations by priority: regions, countries, cities, then airports
   const sortedDestinations = filteredDestinations.sort((a, b) => {
     const typePriority = { region: 1, country: 2, airport: 3, anywhere: 0 };
