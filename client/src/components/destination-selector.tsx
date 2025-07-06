@@ -340,7 +340,10 @@ export default function DestinationSelector({
           {/* Show "Explore everywhere" only when no search term (initial click) */}
           {!searchTerm && (
             <div className="p-3 border-b border-gray-200 bg-blue-50">
-              <button className="flex items-center gap-2 text-blue-600 hover:text-blue-700 text-sm font-medium">
+              <button 
+                onClick={() => handleDestinationSelect({ code: "ANYWHERE", name: "Explore everywhere", type: "anywhere" })}
+                className="flex items-center gap-2 text-blue-600 hover:text-blue-700 text-sm font-medium"
+              >
                 <Globe className="h-4 w-4" />
                 Explore everywhere
               </button>

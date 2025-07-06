@@ -19,9 +19,12 @@ import DestinationSelector from "./destination-selector";
 import DepartureSelector from "./departure-selector";
 
 const formSchema = z.object({
-  fromAirport: z.string().min(3, "Please enter departure airport"),
-  toAirport: z.string().min(3, "Please enter destination airport"),
-  departureDate: z.string().min(1, "Please select departure date"),
+  fromAirport: z.string().min(1, "Please select a departure location"),
+  toAirport: z.string().min(1, "Please select a destination").refine(
+    (val) => val === "ANYWHERE" || val.length >= 1, 
+    "Please select a destination"
+  ),
+  departureDate: z.string().min(1, "Please select a departure date"),
   returnDate: z.string().optional(),
   passengers: z.number().min(1).max(9).default(1),
   filters: z.object({
@@ -45,7 +48,8 @@ export default function FlightSearchForm({ onSearchComplete }: FlightSearchFormP
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
-    mode: "onSubmit", // Only validate on submit, not on change
+    mode: "onSubmit",
+    reValidateMode: "onSubmit", // Only validate on submit
     defaultValues: {
       fromAirport: "",
       toAirport: "",
@@ -63,9 +67,12 @@ export default function FlightSearchForm({ onSearchComplete }: FlightSearchFormP
   });
 
   const onSubmit = (values: FormData) => {
+    // Allow "ANYWHERE" as a valid destination to support "Explore everywhere"
+    const isExploreEverywhere = values.toAirport === "ANYWHERE";
+    
     const searchParams: FlightSearchParams = {
       fromAirport: values.fromAirport.toUpperCase(),
-      toAirport: values.toAirport.toUpperCase(),
+      toAirport: isExploreEverywhere ? "ANYWHERE" : values.toAirport.toUpperCase(),
       departureDate: values.departureDate,
       returnDate: values.returnDate || undefined,
       passengers: values.passengers,
@@ -130,6 +137,9 @@ export default function FlightSearchForm({ onSearchComplete }: FlightSearchFormP
                               label="From"
                             />
                           </FormControl>
+                          {form.formState.errors.fromAirport && form.formState.isSubmitted && (
+                            <p className="text-sm text-red-600 mt-1">{form.formState.errors.fromAirport.message}</p>
+                          )}
                         </FormItem>
                       )}
                     />
@@ -148,6 +158,9 @@ export default function FlightSearchForm({ onSearchComplete }: FlightSearchFormP
                               label="To"
                             />
                           </FormControl>
+                          {form.formState.errors.toAirport && form.formState.isSubmitted && (
+                            <p className="text-sm text-red-600 mt-1">{form.formState.errors.toAirport.message}</p>
+                          )}
                         </FormItem>
                       )}
                     />
@@ -165,6 +178,9 @@ export default function FlightSearchForm({ onSearchComplete }: FlightSearchFormP
                               placeholder="Add date"
                             />
                           </FormControl>
+                          {form.formState.errors.departureDate && form.formState.isSubmitted && (
+                            <p className="text-sm text-red-600 mt-1">{form.formState.errors.departureDate.message}</p>
+                          )}
                         </FormItem>
                       )}
                     />
