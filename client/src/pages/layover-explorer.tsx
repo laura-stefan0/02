@@ -68,7 +68,6 @@ export default function LayoverExplorer() {
             onAirportChange={handleAirportChange}
             title="Select Your Departure Airport"
             subtitle="We'll find long layover flights from your chosen airport"
-            onBack={() => setShowAirportSelector(false)}
           />
         )}
 

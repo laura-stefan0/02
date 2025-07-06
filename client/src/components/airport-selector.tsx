@@ -13,10 +13,9 @@ interface AirportSelectorProps {
   onAirportChange: (airport: { code: string; name: string; city: string; country: string }) => void;
   title: string;
   subtitle: string;
-  onBack?: () => void;
 }
 
-export default function AirportSelector({ selectedAirport, onAirportChange, title, subtitle, onBack }: AirportSelectorProps) {
+export default function AirportSelector({ selectedAirport, onAirportChange, title, subtitle }: AirportSelectorProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [nearestAirport, setNearestAirport] = useState<GeolocationResult | null>(null);
   const [showManualSelection, setShowManualSelection] = useState(false);
@@ -60,19 +59,7 @@ export default function AirportSelector({ selectedAirport, onAirportChange, titl
     <Card className="mb-6">
       <CardContent className="p-6">
         <div className="text-center mb-6">
-          <div className="flex items-center justify-center relative mb-2">
-            {onBack && (
-              <Button
-                onClick={onBack}
-                variant="outline"
-                size="sm"
-                className="absolute left-0"
-              >
-                ← Back
-              </Button>
-            )}
-            <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
-          </div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">{title}</h3>
           <p className="text-gray-600">{subtitle}</p>
         </div>
 
