@@ -71,47 +71,38 @@ export default function Deals() {
 
   return (
     <>
-      {/* FIRST DIV: Header Section - Title, subtitle, and airport selection */}
+      {/* FIRST DIV: Header Section - Simple title with airport change */}
       <div className="py-12 pb-0">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Left Column - Title and Subtitle */}
-            <div className="flex flex-col justify-center">
-              <h1 className="text-4xl font-bold text-gray-900 mb-4">
-                Featured Deals {selectedAirport ? `from ${selectedAirport}` : 'from Your Area'}
+          {showAirportSelector ? (
+            <div className="text-center">
+              <AirportSelector
+                selectedAirport={selectedAirport}
+                onAirportChange={handleAirportChange}
+                title="Select Your Departure Airport"
+                subtitle="We'll show you the best deals from your chosen airport"
+                onBack={() => setShowAirportSelector(false)}
+              />
+            </div>
+          ) : (
+            <div className="text-center">
+              <h1 className="text-4xl font-bold text-gray-900 mb-2">
+                Featured Deals from {selectedAirport || 'Your Area'}
+                {selectedAirport && (
+                  <button 
+                    onClick={() => setShowAirportSelector(true)}
+                    className="ml-3 text-lg text-blue-600 hover:text-blue-800 transition-colors"
+                    title="Change airport"
+                  >
+                    ✏️
+                  </button>
+                )}
               </h1>
               <p className="text-xl text-gray-600">
                 Discover amazing flight deals departing from your closest airport
               </p>
             </div>
-            
-            {/* Right Column - Airport Controls */}
-            <div className="flex flex-col justify-center">
-              {showAirportSelector ? (
-                <AirportSelector
-                  selectedAirport={selectedAirport}
-                  onAirportChange={handleAirportChange}
-                  title="Select Your Departure Airport"
-                  subtitle="We'll show you the best deals from your chosen airport"
-                  onBack={() => setShowAirportSelector(false)}
-                />
-              ) : selectedAirport ? (
-                <div className="text-center lg:text-left">
-                  <Button
-                    onClick={() => setShowAirportSelector(true)}
-                    variant="outline"
-                    className="mb-2"
-                  >
-                    <MapPin className="h-4 w-4 mr-2" />
-                    Change Departure Airport
-                  </Button>
-                  <p className="text-sm text-gray-600">
-                    Currently showing deals from {selectedAirport}
-                  </p>
-                </div>
-              ) : null}
-            </div>
-          </div>
+          )}
         </div>
       </div>
 
