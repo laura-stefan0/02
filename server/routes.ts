@@ -65,6 +65,92 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get recent searches
+
+  // Long layover flights endpoint
+  app.get("/api/long-layovers", async (req, res) => {
+    try {
+      const longLayoverFlights = [
+        {
+          id: 1,
+          route: "VCE → JFK",
+          airline: "Turkish Airlines",
+          price: 45900, // €459 in cents
+          layoverCity: "Istanbul",
+          layoverDuration: "12h 30m",
+          layoverAirport: "IST",
+          departureTime: "14:25",
+          nextDeparture: "Today at 14:25",
+          activities: [
+            "Visit the Blue Mosque and Hagia Sophia",
+            "Explore the Grand Bazaar",
+            "Take a Bosphorus cruise",
+            "Try authentic Turkish cuisine"
+          ],
+          imageUrl: "https://images.unsplash.com/photo-1541432901042-2d8bd64b4a9b"
+        },
+        {
+          id: 2,
+          route: "VCE → LAX",
+          airline: "Emirates",
+          price: 67500, // €675 in cents
+          layoverCity: "Dubai",
+          layoverDuration: "10h 45m",
+          layoverAirport: "DXB",
+          departureTime: "09:15",
+          nextDeparture: "Tomorrow at 09:15",
+          activities: [
+            "Visit the Burj Khalifa observation deck",
+            "Shop at Dubai Mall",
+            "Relax at Dubai Marina",
+            "Experience the Gold Souk"
+          ],
+          imageUrl: "https://images.unsplash.com/photo-1512453979798-5ea266f8880c"
+        },
+        {
+          id: 3,
+          route: "VCE → SYD",
+          airline: "Qatar Airways",
+          price: 89900, // €899 in cents
+          layoverCity: "Doha",
+          layoverDuration: "14h 20m",
+          layoverAirport: "DOH",
+          departureTime: "23:45",
+          nextDeparture: "Tonight at 23:45",
+          activities: [
+            "Explore Souq Waqif traditional market",
+            "Visit the Museum of Islamic Art",
+            "Stroll along the Corniche waterfront",
+            "Experience Qatari hospitality"
+          ],
+          imageUrl: "https://images.unsplash.com/photo-1539650116574-75c0c6d73dd0"
+        },
+        {
+          id: 4,
+          route: "VCE → BKK",
+          airline: "Lufthansa",
+          price: 52300, // €523 in cents
+          layoverCity: "Frankfurt",
+          layoverDuration: "8h 15m",
+          layoverAirport: "FRA",
+          departureTime: "11:30",
+          nextDeparture: "Today at 11:30",
+          activities: [
+            "Quick trip to Frankfurt city center",
+            "Visit the historic Römerberg square",
+            "Enjoy German cuisine and beer",
+            "Explore the Main River area"
+          ],
+          imageUrl: "https://images.unsplash.com/photo-1467269204594-9661b134dd2b"
+        }
+      ];
+
+      res.json(longLayoverFlights);
+    } catch (error) {
+      console.error('Error fetching long layover flights:', error);
+      res.status(500).json({ error: 'Failed to fetch long layover flights' });
+    }
+  });
+
   app.get("/api/recent-searches", async (req, res) => {
     try {
       const recentSearches = await storage.getRecentSearches();
@@ -136,21 +222,21 @@ function generateMockFlightResults(fromAirport: string, toAirport: string, depar
     const airline = airlines[Math.floor(Math.random() * airlines.length)];
     const aircraftType = aircraftTypes[Math.floor(Math.random() * aircraftTypes.length)];
     const flightNumber = `${airline}${Math.floor(Math.random() * 9000) + 1000}`;
-    
+
     // Generate random departure and arrival times
     const depHour = Math.floor(Math.random() * 24);
     const depMinute = Math.floor(Math.random() * 60);
     const duration = Math.floor(Math.random() * 10) + 2; // 2-12 hours
     const arrHour = (depHour + duration) % 24;
     const arrMinute = depMinute + Math.floor(Math.random() * 60);
-    
+
     const stops = Math.floor(Math.random() * 3); // 0-2 stops
     const price = Math.floor(Math.random() * 1500) + 200; // $200-$1700
-    
+
     let layoverAirport = null;
     let layoverDuration = null;
     let isLongLayover = false;
-    
+
     if (stops > 0) {
       const layoverAirports = ['FRA', 'AMS', 'CDG', 'LHR', 'DXB', 'DOH', 'IST'];
       layoverAirport = layoverAirports[Math.floor(Math.random() * layoverAirports.length)];
@@ -159,13 +245,13 @@ function generateMockFlightResults(fromAirport: string, toAirport: string, depar
       layoverDuration = `${layoverHours}h ${layoverMins}m`;
       isLongLayover = layoverHours >= 8;
     }
-    
+
     const amenities = [];
     if (Math.random() > 0.3) amenities.push('In-flight entertainment');
     if (Math.random() > 0.2) amenities.push('WiFi');
     if (Math.random() > 0.5) amenities.push('Power outlets');
     if (Math.random() > 0.4) amenities.push('Refreshments');
-    
+
     results.push({
       id: i + 1,
       airline,
@@ -185,7 +271,7 @@ function generateMockFlightResults(fromAirport: string, toAirport: string, depar
       amenities
     });
   }
-  
+
   return results.sort((a, b) => a.price - b.price);
 }
 
@@ -202,7 +288,7 @@ function getMockAirportSuggestions(query: string) {
     { iataCode: 'NRT', name: 'Tokyo Narita', cityName: 'Tokyo', countryName: 'Japan' },
     { iataCode: 'HKG', name: 'Hong Kong International', cityName: 'Hong Kong', countryName: 'Hong Kong' }
   ];
-  
+
   const queryLower = query.toLowerCase();
   return mockAirports.filter(airport => 
     airport.name.toLowerCase().includes(queryLower) ||
