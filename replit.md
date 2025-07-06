@@ -100,6 +100,14 @@ The application implements a dual storage approach:
 
 ## Changelog
 - July 05, 2025. Initial setup
+- July 05, 2025. Migrated from Replit Agent to Replit environment
+- July 05, 2025. Updated Deals and Long Layovers pages layout - title/subtitle on left, airport selection on right
+
+## Recent Changes
+- Successfully migrated FlightFinder application to Replit environment
+- Verified all dependencies are properly installed and working
+- Updated page layouts for better user experience
+- Application is running smoothly on port 5000 with proper server binding
 
 ## User Preferences
 

@@ -77,30 +77,35 @@ export default function LayoverExplorer() {
             </div>
           </div>
         ) : (
-          <div className="text-center mb-10">
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">
-              Long Layover Explorer {selectedAirport ? `from ${selectedAirport}` : ''}
-            </h1>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Turn your layovers into mini-adventures. Discover flights with extended stopovers perfect for exploring new cities.
-            </p>
-          </div>
-        )}
-
-        {/* Change Airport Button */}
-        {!showAirportSelector && selectedAirport && (
-          <div className="text-center mb-8">
-            <Button
-              onClick={() => setShowAirportSelector(true)}
-              variant="outline"
-              className="mb-2"
-            >
-              <MapPin className="h-4 w-4 mr-2" />
-              Change Departure Airport
-            </Button>
-            <p className="text-sm text-gray-600">
-              Currently showing layover flights from {selectedAirport}
-            </p>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+            {/* Left Column - Title and Subtitle */}
+            <div className="flex flex-col justify-center">
+              <h1 className="text-4xl font-bold text-gray-900 mb-4">
+                Long Layover Explorer {selectedAirport ? `from ${selectedAirport}` : ''}
+              </h1>
+              <p className="text-xl text-gray-600">
+                Turn your layovers into mini-adventures. Discover flights with extended stopovers perfect for exploring new cities.
+              </p>
+            </div>
+            
+            {/* Right Column - Change Airport Button */}
+            <div className="flex flex-col justify-center">
+              {selectedAirport && (
+                <div className="text-center lg:text-left">
+                  <Button
+                    onClick={() => setShowAirportSelector(true)}
+                    variant="outline"
+                    className="mb-2"
+                  >
+                    <MapPin className="h-4 w-4 mr-2" />
+                    Change Departure Airport
+                  </Button>
+                  <p className="text-sm text-gray-600">
+                    Currently showing layover flights from {selectedAirport}
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
         )}
 

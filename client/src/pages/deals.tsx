@@ -97,30 +97,35 @@ export default function Deals() {
             </div>
           </div>
         ) : (
-          <div className="text-center mb-10">
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">
-              Featured Deals {selectedAirport ? `from ${selectedAirport}` : 'from Your Area'}
-            </h1>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Discover amazing flight deals departing from your closest airport
-            </p>
-          </div>
-        )}
-
-        {/* Change Airport Button */}
-        {!showAirportSelector && selectedAirport && (
-          <div className="text-center mb-8">
-            <Button
-              onClick={() => setShowAirportSelector(true)}
-              variant="outline"
-              className="mb-2"
-            >
-              <MapPin className="h-4 w-4 mr-2" />
-              Change Departure Airport
-            </Button>
-            <p className="text-sm text-gray-600">
-              Currently showing deals from {selectedAirport}
-            </p>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+            {/* Left Column - Title and Subtitle */}
+            <div className="flex flex-col justify-center">
+              <h1 className="text-4xl font-bold text-gray-900 mb-4">
+                Featured Deals {selectedAirport ? `from ${selectedAirport}` : 'from Your Area'}
+              </h1>
+              <p className="text-xl text-gray-600">
+                Discover amazing flight deals departing from your closest airport
+              </p>
+            </div>
+            
+            {/* Right Column - Change Airport Button */}
+            <div className="flex flex-col justify-center">
+              {selectedAirport && (
+                <div className="text-center lg:text-left">
+                  <Button
+                    onClick={() => setShowAirportSelector(true)}
+                    variant="outline"
+                    className="mb-2"
+                  >
+                    <MapPin className="h-4 w-4 mr-2" />
+                    Change Departure Airport
+                  </Button>
+                  <p className="text-sm text-gray-600">
+                    Currently showing deals from {selectedAirport}
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
         )}
 
