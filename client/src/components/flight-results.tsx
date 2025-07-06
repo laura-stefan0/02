@@ -198,9 +198,13 @@ export default function FlightResults({ results, isLoading }: FlightResultsProps
                 variant={((results as any).dataSource === 'amadeus') ? 'default' : 'secondary'}
                 className={((results as any).dataSource === 'amadeus') ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800'}
               >
-                {((results as any).dataSource === 'amadeus') ? '✅ Real Data' : '🎭 Mock Data'}
+                {((results as any).dataSource === 'amadeus') ? '✅ Real Amadeus Data' : '🎭 Mock Data'}
               </Badge>
             )}
+            {/* Debug info - remove this later */}
+            <div className="text-xs text-gray-500 mt-1">
+              Debug: Source = {(results as any)?.dataSource || 'unknown'}
+            </div>
           </div>
 
           {/* Quick filter tabs - Skyscanner style */}

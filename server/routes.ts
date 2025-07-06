@@ -72,12 +72,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         searchCount: 1,
       });
 
-      res.json({
+      console.log('🎯 Final response data being sent to client:');
+      console.log(`📊 Data source: ${dataSource}`);
+      console.log(`✈️ Sample flight: ${results[0]?.airline} ${results[0]?.flightNumber} - €${(results[0]?.price / 100).toFixed(2)}`);
+      console.log(`🔢 Total results: ${results.length}`);
+      
+      const response = {
         search,
         results,
         count: results.length,
         dataSource, // Include whether data came from 'amadeus' or 'mock'
-      });
+      };
+      
+      res.json(response);
     } catch (error) {
       console.error("Flight search error:", error);
       res.status(400).json({ 
